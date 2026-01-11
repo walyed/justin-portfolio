@@ -803,12 +803,13 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
 
   return (
     <div className="grid md:grid-cols-3 gap-6">
-      {/* Current Card - Top Left */}
-      <div className="md:col-span-1">
+      {/* Left Column: Current + Newsletter Stacked */}
+      <div className="md:col-span-2 space-y-6">
+        {/* Current Card - Top */}
         <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-4">
           <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Current</h4>
           {currentIssue ? (
-            <a href={currentIssue.link} className="block group">
+            <a href={currentIssue.link || '#'} className="block group">
               <div className="text-xs text-indigo-500 font-mono mb-2">{currentIssue.month || currentMonth}</div>
               <h5 className="text-sm text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{currentIssue.title}</h5>
             </a>
@@ -816,11 +817,9 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
             <div className="text-sm text-slate-600">No current issue</div>
           )}
         </div>
-      </div>
 
-      {/* Newsletter Subscribe Card - Center */}
-      <div className="md:col-span-1 flex justify-center">
-        <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+        {/* Newsletter Subscribe Card - Below Current */}
+        <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
           <div className="p-6 space-y-4">
             {/* Title */}
             <h3 className="text-xl font-bold text-slate-900">Newsletter</h3>
@@ -888,19 +887,19 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
 
       {/* Past Issues Card - Right */}
       <div className="md:col-span-1">
-        <div className="space-y-4">
-          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Past Issues</h4>
+        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-4">
+          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Past Issues</h4>
           {pastIssues.length > 0 ? (
-            pastIssues.map((issue: any) => (
-              <a key={issue.id} href={issue.link} className="block p-4 rounded-lg bg-white hover:shadow-lg border border-indigo-100 hover:border-indigo-300 transition-all duration-300 group">
-                <div className="text-xs text-indigo-500 font-mono mb-1">{issue.month || issue.issue_number || ''}</div>
-                <div className="text-sm text-slate-800 font-bold group-hover:text-indigo-700">{issue.title}</div>
-              </a>
-            ))
-          ) : (
-            <div className="text-sm text-slate-500 p-4 bg-slate-50 rounded-lg border border-slate-200">
-              No past issues yet
+            <div className="space-y-4">
+              {pastIssues.map((issue: any) => (
+                <a key={issue.id} href={issue.link || '#'} className="block group">
+                  <div className="text-xs text-indigo-500 font-mono mb-2">{issue.month || issue.issue_number || ''}</div>
+                  <h5 className="text-sm text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{issue.title}</h5>
+                </a>
+              ))}
             </div>
+          ) : (
+            <div className="text-sm text-slate-600">No past issues yet</div>
           )}
         </div>
       </div>
