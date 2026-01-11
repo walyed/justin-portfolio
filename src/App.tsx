@@ -806,55 +806,48 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
       {/* Left Column: Current + Newsletter Stacked */}
       <div className="md:col-span-2 space-y-6">
         {/* Current Card - Top */}
-        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-4">
-          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Current</h4>
+        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-6">
+          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-5">Current</h4>
           {currentIssue ? (
             <a href={currentIssue.link || '#'} className="block group">
-              <div className="text-xs text-indigo-500 font-mono mb-2">{currentIssue.month || currentMonth}</div>
-              <h5 className="text-sm text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{currentIssue.title}</h5>
+              <div className="text-sm text-indigo-500 font-mono mb-3">{currentIssue.month || currentMonth}</div>
+              <h5 className="text-base text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{currentIssue.title}</h5>
             </a>
           ) : (
-            <div className="text-sm text-slate-600">No current issue</div>
+            <div className="text-base text-slate-600">No current issue</div>
           )}
         </div>
 
-        {/* Newsletter Subscribe Card - Below Current */}
-        <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
-          <div className="p-6 space-y-4">
+        {/* Newsletter Subscribe Card - Below Current (Smaller) */}
+        <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+          <div className="p-5 space-y-3">
             {/* Title */}
-            <h3 className="text-xl font-bold text-slate-900">Newsletter</h3>
+            <h3 className="text-lg font-bold text-slate-900">Newsletter</h3>
             
             {/* Subscribe text */}
-            <p className="text-sm text-slate-600">Subscribe to get monthly updates</p>
-            
-            {/* Current Month Section */}
-            {currentMonth && (
-              <div className="py-3 border-y border-slate-200">
-                <p className="text-base font-medium text-slate-900">{currentMonth}</p>
-              </div>
-            )}
+            <p className="text-xs text-slate-600">Subscribe to get monthly updates</p>
             
             {/* Subscribe Form */}
             {subscribed ? (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg"
+                className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg"
               >
-                <CheckCircle className="w-5 h-5 text-green-600" />
+                <CheckCircle className="w-4 h-4 text-green-600" />
                 <div>
-                  <p className="font-bold text-green-800 text-sm">You're subscribed!</p>
+                  <p className="font-bold text-green-800 text-xs">You're subscribed!</p>
                   <p className="text-xs text-green-600">Thank you for joining.</p>
                 </div>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubscribe} className="space-y-3">
+              <form onSubmit={handleSubscribe} className="space-y-2">
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email address" 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
                   disabled={loading}
                 />
                 {error && (
@@ -863,11 +856,11 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                  className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3 h-3 animate-spin" />
                       Subscribing...
                     </>
                   ) : (
@@ -878,7 +871,7 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
             )}
             
             {/* Footer text */}
-            <p className="text-xs text-slate-500 text-center pt-2">
+            <p className="text-xs text-slate-500 text-center pt-1">
               Join our newsletter to get monthly updates on new tools and features
             </p>
           </div>
@@ -887,19 +880,19 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
 
       {/* Past Issues Card - Right */}
       <div className="md:col-span-1">
-        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-4">
-          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Past Issues</h4>
+        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-6">
+          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-5">Past Issues</h4>
           {pastIssues.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {pastIssues.map((issue: any) => (
                 <a key={issue.id} href={issue.link || '#'} className="block group">
-                  <div className="text-xs text-indigo-500 font-mono mb-2">{issue.month || issue.issue_number || ''}</div>
-                  <h5 className="text-sm text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{issue.title}</h5>
+                  <div className="text-sm text-indigo-500 font-mono mb-3">{issue.month || issue.issue_number || ''}</div>
+                  <h5 className="text-base text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{issue.title}</h5>
                 </a>
               ))}
             </div>
           ) : (
-            <div className="text-sm text-slate-600">No past issues yet</div>
+            <div className="text-base text-slate-600">No past issues yet</div>
           )}
         </div>
       </div>
