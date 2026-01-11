@@ -1425,6 +1425,7 @@ export default function Admin() {
     setNewsletterIssues([...newsletterIssues, {
       title: 'New Issue',
       link: '#',
+      month: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       order_index: newsletterIssues.length
     }]);
   };
