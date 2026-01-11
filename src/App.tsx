@@ -1203,18 +1203,79 @@ const App = () => {
 
                     {/* COMMUNITY & SERVICE SECTION */}
                     <Section id="community" title="Community & Service" chapter="Chapter 05" color="emerald" borderColor="border-emerald-500">
-                        <div className="relative bg-white border border-green-200 shadow-xl rounded-3xl p-8 md:p-12 text-center overflow-hidden group hover:shadow-2xl hover:-translate-y-1 hover:border-emerald-300 transition-all duration-300">
-                            <ColoredBlob color="emerald" />
-                            <div className="relative z-10">
-                                <h2 className="text-3xl font-bold text-slate-900 mb-6">{portfolioData.community?.title || 'Silver AI Initiative'}</h2>
-                                <p className="text-slate-600 mb-8 max-w-xl mx-auto text-lg leading-relaxed">{portfolioData.community?.description || 'Bridging the generational gap.'}</p>
-                                <div className="flex justify-center">
-                                    <a href={portfolioData.community?.cta_link || '#'} className="px-8 py-3 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-lg">
-                                        {portfolioData.community?.cta_text || 'Learn More'} <ChevronRight className="w-4 h-4" />
+                        {(() => {
+                          // Get current/upcoming event (first event)
+                          const upcomingEvent = portfolioData.communityEvents && portfolioData.communityEvents.length > 0 
+                            ? portfolioData.communityEvents[0] 
+                            : null;
+                          const upcomingMonth = upcomingEvent?.month || 'January 2026';
+                          
+                          // Get past events (all except the first one)
+                          const pastEvents = portfolioData.communityEvents && portfolioData.communityEvents.length > 1
+                            ? portfolioData.communityEvents.slice(1)
+                            : [];
+
+                          return (
+                            <div className="flex md:flex-row flex-col gap-1 items-start">
+                              {/* Left Column: Upcoming + Donate Stacked */}
+                              <div className="flex-1 space-y-6 max-w-sm">
+                                {/* Upcoming Card - Top */}
+                                <div className="w-full bg-white rounded-lg border border-emerald-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+                                  <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Upcoming</h4>
+                                  {upcomingEvent ? (
+                                    <a href={upcomingEvent.link || '#'} className="block group">
+                                      <div className="text-sm text-emerald-500 font-mono mb-4">{upcomingEvent.month || upcomingMonth}</div>
+                                      <h5 className="text-base text-slate-800 font-bold group-hover:text-emerald-700 transition-colors">{upcomingEvent.title}</h5>
+                                      {upcomingEvent.description && (
+                                        <p className="text-sm text-slate-600 mt-2">{upcomingEvent.description}</p>
+                                      )}
                                     </a>
+                                  ) : (
+                                    <div className="text-base text-slate-600">No upcoming event</div>
+                                  )}
                                 </div>
+
+                                {/* Donate Card - Below Upcoming */}
+                                <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]">
+                                  <div className="p-6 space-y-4">
+                                    {/* Title */}
+                                    <h3 className="text-lg font-bold text-slate-900">{portfolioData.community?.title || 'Silver AI Initiative'}</h3>
+                                    
+                                    {/* Description */}
+                                    <p className="text-sm text-slate-600">{portfolioData.community?.description || 'Bridging the generational gap. We conduct seminars, provide books, and training to educate seniors in the AI era.'}</p>
+                                    
+                                    {/* CTA Button */}
+                                    <a 
+                                      href={portfolioData.community?.cta_link || '#'} 
+                                      className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 text-sm"
+                                    >
+                                      {portfolioData.community?.cta_text || 'Donate via GoFundMe'} <ChevronRight className="w-4 h-4" />
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Past Events Card - Right */}
+                              <div className="flex-1 max-w-sm">
+                                <div className="bg-white rounded-lg border border-emerald-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+                                  <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Events</h4>
+                                  {pastEvents.length > 0 ? (
+                                    <div className="space-y-5">
+                                      {pastEvents.map((event: any) => (
+                                        <a key={event.id} href={event.link || '#'} className="block group">
+                                          <div className="text-sm text-emerald-500 font-mono mb-3">{event.month || ''}</div>
+                                          <h5 className="text-base text-slate-800 font-bold group-hover:text-emerald-700 transition-colors">{event.title}</h5>
+                                        </a>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="text-base text-slate-600">No past events yet</div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                        </div>
+                          );
+                        })()}
                     </Section>
 
                     {/* MEDIA & PRESS SECTION */}

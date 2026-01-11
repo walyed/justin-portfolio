@@ -67,6 +67,14 @@ export interface Community {
   cta_link: string;
 }
 
+export interface CommunityEvent {
+  id: number;
+  title: string;
+  description?: string;
+  link: string;
+  month?: string; // e.g., "January 2026"
+}
+
 export interface Press {
   id: number;
   title: string;
@@ -132,6 +140,7 @@ export interface PortfolioData {
   awards: Award[];
   specialAwards: SpecialAward[];
   community: Community | null;
+  communityEvents: CommunityEvent[];
   press: Press[];
   publications: Publication[];
   endorsements: Endorsement[];
