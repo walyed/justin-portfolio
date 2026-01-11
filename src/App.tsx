@@ -806,12 +806,12 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
       {/* Left Column: Current + Newsletter Stacked */}
       <div className="flex-1 space-y-6 max-w-sm">
         {/* Current Card - Top */}
-        <div className="w-full bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
-          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Current</h4>
+        <div className="w-full bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border-2 border-indigo-300 hover:border-indigo-400 hover:shadow-xl transition-all duration-300 p-8 min-h-[180px]">
+          <h4 className="text-lg font-black text-indigo-900 uppercase tracking-wider mb-6">Current</h4>
           {currentIssue ? (
             <a href={currentIssue.link || '#'} className="block group">
-              <div className="text-sm text-indigo-500 font-mono mb-4">{currentIssue.month || currentMonth}</div>
-              <h5 className="text-base text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{currentIssue.title}</h5>
+              <div className="text-sm text-indigo-600 font-bold font-mono mb-4">{currentIssue.month || currentMonth}</div>
+              <h5 className="text-lg text-slate-900 font-black group-hover:text-indigo-700 transition-colors">{currentIssue.title}</h5>
             </a>
           ) : (
             <div className="text-base text-slate-600">No current issue</div>
@@ -880,14 +880,14 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
 
       {/* Past Issues Card - Right */}
       <div className="flex-1 max-w-sm">
-        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
-          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Issues</h4>
+        <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-xl border-2 border-indigo-200 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 p-8 min-h-[180px]">
+          <h4 className="text-lg font-black text-slate-900 uppercase tracking-wider mb-6">Past Issues</h4>
           {pastIssues.length > 0 ? (
             <div className="space-y-5">
               {pastIssues.map((issue: any) => (
                 <a key={issue.id} href={issue.link || '#'} className="block group">
-                  <div className="text-sm text-indigo-500 font-mono mb-3">{issue.month || issue.issue_number || ''}</div>
-                  <h5 className="text-base text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{issue.title}</h5>
+                  <div className="text-sm text-indigo-600 font-bold font-mono mb-3">{issue.month || issue.issue_number || ''}</div>
+                  <h5 className="text-base text-slate-900 font-black group-hover:text-indigo-700 transition-colors">{issue.title}</h5>
                 </a>
               ))}
             </div>
@@ -1220,12 +1220,12 @@ const App = () => {
                               {/* Left Column: Upcoming + Donate Stacked */}
                               <div className="flex-1 space-y-6 max-w-sm">
                                 {/* Upcoming Card - Top */}
-                                <div className="w-full bg-white rounded-lg border border-emerald-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
-                                  <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Upcoming</h4>
+                                <div className="w-full bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-300 hover:border-emerald-400 hover:shadow-xl transition-all duration-300 p-8 min-h-[180px]">
+                                  <h4 className="text-lg font-black text-emerald-900 uppercase tracking-wider mb-6">Upcoming</h4>
                                   {upcomingEvent ? (
                                     <a href={upcomingEvent.link || '#'} className="block group">
-                                      <div className="text-sm text-emerald-500 font-mono mb-4">{upcomingEvent.month || upcomingMonth}</div>
-                                      <h5 className="text-base text-slate-800 font-bold group-hover:text-emerald-700 transition-colors">{upcomingEvent.title}</h5>
+                        <div className="text-sm text-emerald-600 font-bold font-mono mb-4">{upcomingEvent.month || upcomingMonth}</div>
+                        <h5 className="text-lg text-slate-900 font-black group-hover:text-emerald-700 transition-colors">{upcomingEvent.title}</h5>
                                       {upcomingEvent.description && (
                                         <p className="text-sm text-slate-600 mt-2">{upcomingEvent.description}</p>
                                       )}
@@ -1257,14 +1257,14 @@ const App = () => {
 
                               {/* Past Events Card - Right */}
                               <div className="flex-1 max-w-sm">
-                                <div className="bg-white rounded-lg border border-emerald-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
-                                  <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Events</h4>
+                                <div className="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl border-2 border-emerald-200 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 p-8 min-h-[180px]">
+                                  <h4 className="text-lg font-black text-slate-900 uppercase tracking-wider mb-6">Past Events</h4>
                                   {pastEvents.length > 0 ? (
                                     <div className="space-y-5">
                                       {pastEvents.map((event: any) => (
                                         <a key={event.id} href={event.link || '#'} className="block group">
-                                          <div className="text-sm text-emerald-500 font-mono mb-3">{event.month || ''}</div>
-                                          <h5 className="text-base text-slate-800 font-bold group-hover:text-emerald-700 transition-colors">{event.title}</h5>
+                            <div className="text-sm text-emerald-600 font-bold font-mono mb-3">{event.month || ''}</div>
+                            <h5 className="text-base text-slate-900 font-black group-hover:text-emerald-700 transition-colors">{event.title}</h5>
                                         </a>
                                       ))}
                                     </div>
