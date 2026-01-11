@@ -3209,6 +3209,234 @@ export default function Admin() {
           </div>
         </SectionWrapper>
 
+        {/* Footer Section */}
+        <SectionWrapper 
+          title="Footer" 
+          icon={Home} 
+          isOpen={openSections.footer} 
+          onToggle={() => toggleSection('footer')}
+          previewContent={footer && (
+            <div className="space-y-4">
+              <div className="bg-slate-900 text-white p-8 rounded-xl">
+                <div className="grid md:grid-cols-2 gap-12">
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold uppercase tracking-wider mb-6">Connect</h3>
+                    <div className="flex gap-6">
+                      <div className="w-10 h-10 rounded-lg bg-slate-800"></div>
+                      <div className="w-10 h-10 rounded-lg bg-slate-800"></div>
+                      <div className="w-10 h-10 rounded-lg bg-slate-800"></div>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-8">
+                    <div>
+                      <h4 className="text-lg font-bold uppercase mb-4">{footer.name}</h4>
+                      <ul className="space-y-2 text-slate-400 text-sm">
+                        {footer.roles.slice(0, 2).map((role, idx) => (
+                          <li key={idx}>{role}</li>
+                        ))}
+                        <li>{footer.location}</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold uppercase mb-4">{footer.education_title}</h4>
+                      <ul className="space-y-2 text-slate-400 text-sm">
+                        {footer.education_items.slice(0, 3).map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold uppercase mb-4">Status</h4>
+                      <div className="space-y-2 text-slate-400 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${footer.status_available ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                          <span>{footer.status_text}</span>
+                        </div>
+                        <div>{footer.contact_email}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        >
+          {footer && (
+            <div className="space-y-6">
+              {/* Basic Info */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-700">Basic Information</h3>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={footer.name}
+                    onChange={(e) => setFooter({ ...footer, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                  <input
+                    type="text"
+                    value={footer.location}
+                    onChange={(e) => setFooter({ ...footer, location: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Roles */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-slate-700">Roles/Positions</h3>
+                  <button 
+                    onClick={() => setFooter({ ...footer, roles: [...footer.roles, ''] })}
+                    className="flex items-center gap-1 px-3 py-1 text-sm border border-slate-300 rounded-lg hover:bg-slate-50"
+                  >
+                    <Plus className="w-4 h-4" /> Add Role
+                  </button>
+                </div>
+                {footer.roles.map((role, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={role}
+                      onChange={(e) => {
+                        const updated = [...footer.roles];
+                        updated[index] = e.target.value;
+                        setFooter({ ...footer, roles: updated });
+                      }}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Role/Position"
+                    />
+                    <button
+                      onClick={() => setFooter({ ...footer, roles: footer.roles.filter((_, i) => i !== index) })}
+                      className="px-3 py-2 text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Education */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Education Title</label>
+                  <input
+                    type="text"
+                    value={footer.education_title}
+                    onChange={(e) => setFooter({ ...footer, education_title: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-slate-700">Education Items</h3>
+                  <button 
+                    onClick={() => setFooter({ ...footer, education_items: [...footer.education_items, ''] })}
+                    className="flex items-center gap-1 px-3 py-1 text-sm border border-slate-300 rounded-lg hover:bg-slate-50"
+                  >
+                    <Plus className="w-4 h-4" /> Add Item
+                  </button>
+                </div>
+                {footer.education_items.map((item, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={item}
+                      onChange={(e) => {
+                        const updated = [...footer.education_items];
+                        updated[index] = e.target.value;
+                        setFooter({ ...footer, education_items: updated });
+                      }}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Education item"
+                    />
+                    <button
+                      onClick={() => setFooter({ ...footer, education_items: footer.education_items.filter((_, i) => i !== index) })}
+                      className="px-3 py-2 text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Status */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-700">Status</h3>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Status Text</label>
+                  <input
+                    type="text"
+                    value={footer.status_text}
+                    onChange={(e) => setFooter({ ...footer, status_text: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={footer.status_available}
+                    onChange={(e) => setFooter({ ...footer, status_available: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <label className="text-sm text-slate-700">Available (green dot)</label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Contact Email</label>
+                  <input
+                    type="email"
+                    value={footer.contact_email}
+                    onChange={(e) => setFooter({ ...footer, contact_email: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Social Links */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-700">Social Media Links</h3>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">LinkedIn URL</label>
+                  <input
+                    type="url"
+                    value={footer.linkedin_url}
+                    onChange={(e) => setFooter({ ...footer, linkedin_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="https://linkedin.com/in/..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">GitHub URL</label>
+                  <input
+                    type="url"
+                    value={footer.github_url}
+                    onChange={(e) => setFooter({ ...footer, github_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="https://github.com/..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Email URL (optional)</label>
+                  <input
+                    type="url"
+                    value={footer.email_url}
+                    onChange={(e) => setFooter({ ...footer, email_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    placeholder="mailto: or custom URL"
+                  />
+                </div>
+              </div>
+
+              <button onClick={saveFooter} disabled={saving} className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                <Save className="w-4 h-4" /> Save Footer
+              </button>
+            </div>
+          )}
+        </SectionWrapper>
+
       </main>
     </div>
   );
