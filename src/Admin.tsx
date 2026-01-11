@@ -914,6 +914,7 @@ export default function Admin() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ hero: true });
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [previewItem, setPreviewItem] = useState<number | null>(null);
+  const [heroFrameSize, setHeroFrameSize] = useState<'small' | 'medium' | 'large'>('medium');
   
   // Layout settings for each section
   const [sectionLayouts, setSectionLayouts] = useState<Record<string, LayoutSettings>>({
@@ -1613,19 +1614,45 @@ export default function Admin() {
           isOpen={openSections.hero} 
           onToggle={() => toggleSection('hero')}
           previewContent={heroContent && (
-            <div className="bg-slate-900 text-white p-8 rounded-xl">
-              <div className="text-center space-y-4">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600/80 rounded-full">
-                  <span className="text-yellow-100 text-sm font-bold">{heroContent.badge_text}</span>
+            <div className="bg-[#000205] text-white p-8 rounded-xl relative overflow-hidden min-h-[600px]">
+              {/* Simplified particle background */}
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute w-32 h-32 bg-violet-600 rounded-full blur-3xl top-10 left-10"></div>
+                <div className="absolute w-40 h-40 bg-indigo-600 rounded-full blur-3xl bottom-20 right-20"></div>
+              </div>
+              <div className="relative z-10 text-center space-y-6">
+                {/* Badge and Subtitle */}
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600/80 rounded-full">
+                    <Trophy className="w-4 h-4 text-yellow-200" />
+                    <span className="text-yellow-100 text-sm font-bold">{heroContent.badge_text}</span>
+                  </div>
+                  <p className="text-slate-400 text-xs tracking-widest uppercase">{heroContent.subtitle}</p>
                 </div>
-                <p className="text-slate-400 text-sm tracking-widest uppercase">{heroContent.subtitle}</p>
-                <h1 className="text-5xl font-black">{heroContent.name}</h1>
-                <p className="text-xl text-slate-300">{heroContent.tagline} <span className="text-yellow-400">{heroContent.tagline_highlight}</span></p>
+                
+                {/* Image Frame Preview */}
+                {heroImages.filter(img => img.is_active && img.image_url).length > 0 && (
+                  <div className={`mx-auto rounded-2xl overflow-hidden shadow-2xl border border-white/20 ${
+                    heroFrameSize === 'small' ? 'w-48 h-48' : 
+                    heroFrameSize === 'large' ? 'w-96 h-80' : 
+                    'w-64 h-64'
+                  }`}>
+                    <div 
+                      className="w-full h-full bg-cover bg-center"
+                      style={{ backgroundImage: `url(${heroImages.find(img => img.is_active && img.image_url)?.image_url})` }}
+                    />
+                  </div>
+                )}
+                
+                {/* Name */}
+                <h1 className="text-4xl font-black">{heroContent.name}</h1>
+                
+                {/* Stats */}
                 <div className="grid grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-700">
-                  <div><div className="text-2xl font-bold">{heroContent.stat_1_value}</div><div className="text-xs text-slate-400">{heroContent.stat_1_label}</div></div>
-                  <div><div className="text-2xl font-bold">{heroContent.stat_2_value}</div><div className="text-xs text-slate-400">{heroContent.stat_2_label}</div></div>
-                  <div><div className="text-2xl font-bold">{heroContent.stat_3_value}</div><div className="text-xs text-slate-400">{heroContent.stat_3_label}</div></div>
-                  <div><div className="text-2xl font-bold">{heroContent.stat_4_value}</div><div className="text-xs text-slate-400">{heroContent.stat_4_label}</div></div>
+                  <div><div className="text-xl font-bold">{heroContent.stat_1_value}</div><div className="text-xs text-slate-400">{heroContent.stat_1_label}</div></div>
+                  <div><div className="text-xl font-bold">{heroContent.stat_2_value}</div><div className="text-xs text-slate-400">{heroContent.stat_2_label}</div></div>
+                  <div><div className="text-xl font-bold">{heroContent.stat_3_value}</div><div className="text-xs text-slate-400">{heroContent.stat_3_label}</div></div>
+                  <div><div className="text-xl font-bold">{heroContent.stat_4_value}</div><div className="text-xs text-slate-400">{heroContent.stat_4_label}</div></div>
                 </div>
               </div>
             </div>
@@ -1661,26 +1688,6 @@ export default function Admin() {
                   onChange={(e) => setHeroContent({ ...heroContent, name: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-2xl font-bold"
                 />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tagline</label>
-                  <input
-                    type="text"
-                    value={heroContent.tagline}
-                    onChange={(e) => setHeroContent({ ...heroContent, tagline: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tagline Highlight</label>
-                  <input
-                    type="text"
-                    value={heroContent.tagline_highlight}
-                    onChange={(e) => setHeroContent({ ...heroContent, tagline_highlight: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map(n => (
