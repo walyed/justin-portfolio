@@ -806,7 +806,7 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
       {/* Left Column: Current + Newsletter Stacked */}
       <div className="md:col-span-2 space-y-6">
         {/* Current Card - Top */}
-        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-6">
+        <div className="w-full max-w-md bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-6">
           <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-5">Current</h4>
           {currentIssue ? (
             <a href={currentIssue.link || '#'} className="block group">
