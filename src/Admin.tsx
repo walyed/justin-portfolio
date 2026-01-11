@@ -589,6 +589,15 @@ interface NewsletterSubscriber {
   notes?: string;
 }
 
+interface HeroImage {
+  id?: number;
+  image_url: string;
+  alt_text: string;
+  brightness: number;
+  order_index: number;
+  is_active: boolean;
+}
+
 interface HeroContent {
   id?: number;
   badge_text: string;
@@ -888,6 +897,7 @@ export default function Admin() {
   
   // Content state
   const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
   const [communityContent, setCommunityContent] = useState<CommunityContent | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -992,10 +1002,11 @@ export default function Admin() {
     setLoading(true);
     try {
       const [
-        heroRes, aboutRes, communityRes, projectsRes, leadershipRes,
+        heroRes, heroImagesRes, aboutRes, communityRes, projectsRes, leadershipRes,
         awardsRes, specialAwardsRes, pressRes, publicationsRes, endorsementsRes, newsletterRes, subscribersRes
       ] = await Promise.all([
         supabase.from('hero_content').select('*').single(),
+        supabase.from('hero_images').select('*').order('order_index'),
         supabase.from('about_content').select('*').single(),
         supabase.from('community').select('*').single(),
         supabase.from('projects').select('*').order('order_index'),
@@ -1010,6 +1021,7 @@ export default function Admin() {
       ]);
 
       if (heroRes.data) setHeroContent(heroRes.data);
+      if (heroImagesRes.data) setHeroImages(heroImagesRes.data);
       if (aboutRes.data) setAboutContent(aboutRes.data);
       if (communityRes.data) setCommunityContent(communityRes.data);
       if (projectsRes.data) setProjects(projectsRes.data);
@@ -1055,6 +1067,58 @@ export default function Admin() {
     if (error) showNotification('error', 'Failed to save hero content');
     else showNotification('success', 'Hero content saved!');
     setSaving(false);
+  };
+
+  // Hero Images CRUD
+  const addHeroImage = () => {
+    setHeroImages([...heroImages, {
+      image_url: '',
+      alt_text: '',
+      brightness: 80,
+      order_index: heroImages.length,
+      is_active: true
+    }]);
+  };
+
+  const updateHeroImage = (index: number, updates: Partial<HeroImage>) => {
+    const updated = [...heroImages];
+    updated[index] = { ...updated[index], ...updates };
+    setHeroImages(updated);
+  };
+
+  const deleteHeroImage = async (index: number) => {
+    const image = heroImages[index];
+    if (image.id) {
+      await supabase.from('hero_images').delete().eq('id', image.id);
+    }
+    setHeroImages(heroImages.filter((_, i) => i !== index));
+    showNotification('success', 'Image deleted');
+  };
+
+  const saveHeroImages = async () => {
+    setSaving(true);
+    for (let i = 0; i < heroImages.length; i++) {
+      const image = { ...heroImages[i], order_index: i };
+      if (image.id) {
+        await supabase.from('hero_images').update(image).eq('id', image.id);
+      } else {
+        const { data } = await supabase.from('hero_images').insert(image).select().single();
+        if (data) heroImages[i] = data;
+      }
+    }
+    setHeroImages([...heroImages]);
+    showNotification('success', 'Hero images saved!');
+    setSaving(false);
+  };
+
+  const uploadHeroImage = async (file: File, index: number) => {
+    const url = await uploadImage(file, 'portfolio-images', 'hero');
+    if (url) {
+      updateHeroImage(index, { image_url: url });
+      showNotification('success', 'Image uploaded!');
+    } else {
+      showNotification('error', 'Failed to upload image');
+    }
   };
 
   const saveAboutContent = async () => {

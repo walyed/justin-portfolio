@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { 
   HeroContent, 
+  HeroImage,
   AboutContent, 
   Community, 
   SectionLayout,
@@ -11,6 +12,7 @@ import type {
 // Re-export types for convenience
 export type { 
   HeroContent, 
+  HeroImage,
   AboutContent, 
   Project, 
   Leadership, 
@@ -59,6 +61,7 @@ const defaultCommunity: Community = {
 export function usePortfolioData(): PortfolioData {
   const [data, setData] = useState<PortfolioData>({
     hero: defaultHero,
+    heroImages: [],
     about: defaultAbout,
     projects: [],
     leadership: [],
@@ -79,6 +82,7 @@ export function usePortfolioData(): PortfolioData {
       try {
         const [
           heroRes,
+          heroImagesRes,
           aboutRes,
           projectsRes,
           leadershipRes,
@@ -92,6 +96,7 @@ export function usePortfolioData(): PortfolioData {
           layoutsRes,
         ] = await Promise.all([
           supabase.from('hero_content').select('*').single(),
+          supabase.from('hero_images').select('*').eq('is_active', true).order('order_index'),
           supabase.from('about_content').select('*').single(),
           supabase.from('projects').select('*').order('order_index'),
           supabase.from('leadership').select('*').order('order_index'),
@@ -115,6 +120,7 @@ export function usePortfolioData(): PortfolioData {
 
         setData({
           hero: heroRes.data || defaultHero,
+          heroImages: heroImagesRes.data || [],
           about: aboutRes.data || defaultAbout,
           projects: projectsRes.data || [],
           leadership: leadershipRes.data || [],

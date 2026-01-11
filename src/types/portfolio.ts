@@ -113,8 +113,18 @@ export interface SectionLayout {
   image_size: 'sm' | 'md' | 'lg' | 'full';
 }
 
+export interface HeroImage {
+  id?: number;
+  image_url: string;
+  alt_text: string;
+  brightness: number;
+  order_index: number;
+  is_active: boolean;
+}
+
 export interface PortfolioData {
   hero: HeroContent | null;
+  heroImages: HeroImage[];
   about: AboutContent | null;
   projects: Project[];
   leadership: Leadership[];

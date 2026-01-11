@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { 
-  Award, ChevronRight, ArrowRight, Play, ArrowDown,
+  Award, ChevronRight, ArrowRight, Play,
   Quote, Trophy, Heart, Globe, Crown, CheckCircle, Loader2
 } from 'lucide-react';
 import { usePortfolioData } from './hooks/usePortfolioData';
 import { supabase } from './lib/supabase';
-import type { HeroContent } from './types/portfolio';
+import type { HeroContent, HeroImage } from './types/portfolio';
 
 // --- COMPONENT: FLOATING MESH BACKGROUND ---
 const FloatingMeshBackground = () => {
@@ -36,8 +36,328 @@ const FloatingMeshBackground = () => {
   );
 };
 
-// --- PART 1: HERO SECTION (DENSE NEURAL NET) ---
-const ParticleHero = ({ heroData }: { heroData: HeroContent }) => {
+// --- PART 1: HERO SECTION (PARTICLE BACKGROUND + IMAGE SLIDESHOW) ---
+const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroImages: HeroImage[] }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Default images if none provided
+  const defaultImages: HeroImage[] = [
+    { image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80', alt_text: 'Technology', brightness: 80, order_index: 0, is_active: true },
+    { image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80', alt_text: 'Circuit', brightness: 75, order_index: 1, is_active: true },
+    { image_url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1920&q=80', alt_text: 'Code', brightness: 70, order_index: 2, is_active: true },
+  ];
+  
+  const images = heroImages.length > 0 ? heroImages : defaultImages;
+  
+  // Auto-advance slideshow
+  useEffect(() => {
+    if (images.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  // Particle neural network background
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let animationFrameId: number;
+    let particles: Particle[] = [];
+    
+    const particleCount = 350; 
+    const connectionDistance = 100;
+    const mouseDistance = 250;
+    const gridSpeed = 0.4;
+    let gridOffset = 0;
+    let autoTiltAngle = 0;
+
+    const mouse = { x: null as number | null, y: null as number | null };
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight; 
+      initParticles();
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.x = null;
+      mouse.y = null;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+        if(e.touches && e.touches.length > 0) {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.touches[0].clientX - rect.left;
+            mouse.y = e.touches[0].clientY - rect.top;
+        }
+    };
+
+    class Particle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      baseColor: string;
+
+      constructor() {
+        this.x = Math.random() * canvas!.width;
+        this.y = Math.random() * (canvas!.height * 0.75);
+        this.vx = (Math.random() - 0.5) * 0.3;
+        this.vy = (Math.random() - 0.5) * 0.3;
+        this.size = Math.random() * 1.5 + 0.5;
+        this.baseColor = Math.random() > 0.5 ? '139, 92, 246' : '99, 102, 241';
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > canvas!.width) this.vx = -this.vx;
+        if (this.y < 0 || this.y > canvas!.height * 0.8) this.vy = -this.vy; 
+
+        if (mouse.x != null && mouse.y != null) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < mouseDistance) {
+             const forceDirectionX = dx / distance;
+             const forceDirectionY = dy / distance;
+             const force = (mouseDistance - distance) / mouseDistance;
+             this.x -= forceDirectionX * force * 4;
+             this.y -= forceDirectionY * force * 4;
+          }
+        }
+      }
+
+      draw() {
+        ctx!.fillStyle = `rgba(${this.baseColor}, 0.7)`; 
+        ctx!.beginPath();
+        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx!.fill();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+    }
+
+    function drawLandscape() {
+        const horizonY = canvas!.height * 0.65;
+        const centerX = canvas!.width / 2;
+        let tiltX = 0;
+        if (mouse.x !== null) {
+            tiltX = (mouse.x - centerX) * 0.03; 
+        } else {
+            autoTiltAngle += 0.008;
+            tiltX = Math.sin(autoTiltAngle) * (canvas!.width * 0.04);
+        }
+
+        const gradient = ctx!.createLinearGradient(0, horizonY - 100, 0, horizonY + 200);
+        gradient.addColorStop(0, "rgba(0,0,0,0)");
+        gradient.addColorStop(0.5, "rgba(139, 92, 246, 0.15)");
+        gradient.addColorStop(1, "rgba(0,0,0,0)");
+        ctx!.fillStyle = gradient;
+        ctx!.fillRect(0, horizonY - 100, canvas!.width, 300);
+
+        ctx!.save();
+        ctx!.beginPath();
+        ctx!.rect(0, horizonY, canvas!.width, canvas!.height - horizonY);
+        ctx!.clip();
+
+        ctx!.strokeStyle = "rgba(139, 92, 246, 0.12)";
+        ctx!.lineWidth = 1;
+        const spacing = canvas!.width * 1.5 / 20;
+        for(let i = -10; i <= 30; i++) {
+            const xBase = (i * spacing) - tiltX;
+            ctx!.beginPath();
+            ctx!.moveTo(centerX + (xBase - centerX) * 0.1, horizonY);
+            ctx!.lineTo(xBase + (xBase - centerX) * 4, canvas!.height);
+            ctx!.stroke();
+        }
+
+        gridOffset = (gridOffset + gridSpeed) % 40;
+        for(let i = 0; i < 20; i++) {
+            const z = i * 40 + gridOffset;
+            const yPos = horizonY + (Math.pow(z / 800, 2) * (canvas!.height - horizonY));
+            if (yPos < canvas!.height && yPos > horizonY) {
+                const opacity = Math.min(1, (yPos - horizonY) / 200);
+                ctx!.strokeStyle = `rgba(139, 92, 246, ${opacity * 0.2})`;
+                ctx!.beginPath();
+                ctx!.moveTo(0, yPos);
+                ctx!.lineTo(canvas!.width, yPos);
+                ctx!.stroke();
+            }
+        }
+        ctx!.restore();
+    }
+
+    function animate() {
+      ctx!.fillStyle = '#000205'; 
+      ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
+      
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < connectionDistance) {
+                ctx!.beginPath();
+                const opacity = 1 - (distance / connectionDistance);
+                ctx!.strokeStyle = `rgba(139, 92, 246, ${opacity * 0.35})`; 
+                ctx!.lineWidth = 0.5;
+                ctx!.moveTo(particles[i].x, particles[i].y);
+                ctx!.lineTo(particles[j].x, particles[j].y);
+                ctx!.stroke();
+            }
+        }
+      }
+      drawLandscape();
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', handleResize);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+    handleResize();
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  const currentImage = images[currentIndex];
+  const brightness = currentImage?.brightness || 80;
+
+  return (
+    <div className="relative w-full h-[85vh] lg:h-screen overflow-hidden border-b border-white/5 bg-[#000205]">
+      {/* Particle Neural Network Background */}
+      <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+      <div className="absolute top-[65%] left-0 w-full h-[150px] bg-violet-600/10 blur-[80px] pointer-events-none" />
+      
+      {/* Hero Content */}
+      <div className="relative z-10 h-full w-full flex flex-col items-center justify-center px-4">
+        {/* Badge and Subtitle - Above Image */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col items-center mb-6 pointer-events-none"
+        >
+          <div className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-600/80 to-amber-600/80 rounded-full mb-3">
+            <Trophy className="w-4 h-4 text-yellow-200" />
+            <span className="text-yellow-100 text-sm font-bold tracking-wider">{heroData.badge_text}</span>
+          </div>
+          <p className="text-slate-400 text-sm tracking-[0.2em] uppercase text-center">
+            {heroData.subtitle}
+          </p>
+        </motion.div>
+
+        {/* Image Slideshow - Smaller frame in center */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative w-full max-w-md md:max-w-lg lg:max-w-xl h-64 md:h-80 lg:h-96 mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0"
+            >
+              <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ 
+                  backgroundImage: `url(${currentImage?.image_url})`,
+                  filter: `brightness(${brightness / 100})`
+                }}
+              />
+            </motion.div>
+          </AnimatePresence>
+          
+          {/* Slide indicators */}
+          {images.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+              {images.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    idx === currentIndex 
+                      ? 'bg-white w-8' 
+                      : 'bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Name - Centered below image */}
+        <motion.h1 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight mb-12 text-center pointer-events-none"
+        >
+          {heroData.name}
+        </motion.h1>
+
+        {/* Stats Row - Bottom */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 text-center pointer-events-none"
+        >
+          <div>
+            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_1_value}</div>
+            <div className="text-xs text-yellow-500 uppercase tracking-wider mt-1">{heroData.stat_1_label}</div>
+          </div>
+          <div>
+            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_2_value}</div>
+            <div className="text-xs text-yellow-500 uppercase tracking-wider mt-1">{heroData.stat_2_label}</div>
+          </div>
+          <div>
+            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_3_value}</div>
+            <div className="text-xs text-violet-400 uppercase tracking-wider mt-1">{heroData.stat_3_label}</div>
+          </div>
+          <div>
+            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_4_value}</div>
+            <div className="text-xs text-violet-400 uppercase tracking-wider mt-1">{heroData.stat_4_label}</div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+// Keep the old particle code for reference but not used
+const _ParticleHeroOld = ({ heroData }: { heroData: HeroContent }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -641,7 +961,7 @@ const App = () => {
       </div>
 
       <main className="w-full">
-        <section id="home"><ParticleHero heroData={portfolioData.hero!} /></section>
+        <section id="home"><HeroSlideshow heroData={portfolioData.hero!} heroImages={portfolioData.heroImages} /></section>
         
         {/* White Content Area Below Hero */}
         <div className="w-full bg-[#ffffff] text-slate-800 relative">
