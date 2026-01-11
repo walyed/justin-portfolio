@@ -802,7 +802,7 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
     : [];
 
   return (
-    <div className="grid md:grid-cols-3 gap-4 items-start">
+    <div className="grid md:grid-cols-3 gap-2 items-start">
       {/* Left Column: Current + Newsletter Stacked */}
       <div className="md:col-span-2 space-y-6">
         {/* Current Card - Top */}
