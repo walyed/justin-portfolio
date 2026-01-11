@@ -919,6 +919,7 @@ export default function Admin() {
   const [endorsements, setEndorsements] = useState<Endorsement[]>([]);
   const [newsletterIssues, setNewsletterIssues] = useState<NewsletterIssue[]>([]);
   const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([]);
+  const [communityEvents, setCommunityEvents] = useState<CommunityEvent[]>([]);
   
   // UI state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ hero: true });
