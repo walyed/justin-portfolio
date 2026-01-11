@@ -790,76 +790,118 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
     }
   };
 
-  // Get current/latest newsletter issue month
+  // Get current/latest newsletter issue
   const currentIssue = portfolioData.newsletterIssues && portfolioData.newsletterIssues.length > 0 
     ? portfolioData.newsletterIssues[0] 
     : null;
   const currentMonth = currentIssue?.month || 'December 2025';
+  
+  // Get past issues (all except the first one)
+  const pastIssues = portfolioData.newsletterIssues && portfolioData.newsletterIssues.length > 1
+    ? portfolioData.newsletterIssues.slice(1)
+    : [];
 
   return (
-    <div className="flex justify-center">
-      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
-        <div className="p-6 space-y-4">
-          {/* Title */}
-          <h3 className="text-xl font-bold text-slate-900">Newsletter</h3>
-          
-          {/* Subscribe text */}
-          <p className="text-sm text-slate-600">Subscribe to get monthly updates</p>
-          
-          {/* Current Month Section */}
-          {currentMonth && (
-            <div className="py-3 border-y border-slate-200">
-              <p className="text-base font-medium text-slate-900">{currentMonth}</p>
+    <div className="grid md:grid-cols-3 gap-6">
+      {/* Current Card - Top Left */}
+      <div className="md:col-span-1">
+        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-4">
+          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Current</h4>
+          {currentIssue ? (
+            <a href={currentIssue.link} className="block group">
+              <div className="text-xs text-indigo-500 font-mono mb-2">{currentIssue.month || currentMonth}</div>
+              <h5 className="text-sm text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{currentIssue.title}</h5>
+            </a>
+          ) : (
+            <div className="text-sm text-slate-600">No current issue</div>
+          )}
+        </div>
+      </div>
+
+      {/* Newsletter Subscribe Card - Center */}
+      <div className="md:col-span-1 flex justify-center">
+        <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+          <div className="p-6 space-y-4">
+            {/* Title */}
+            <h3 className="text-xl font-bold text-slate-900">Newsletter</h3>
+            
+            {/* Subscribe text */}
+            <p className="text-sm text-slate-600">Subscribe to get monthly updates</p>
+            
+            {/* Current Month Section */}
+            {currentMonth && (
+              <div className="py-3 border-y border-slate-200">
+                <p className="text-base font-medium text-slate-900">{currentMonth}</p>
+              </div>
+            )}
+            
+            {/* Subscribe Form */}
+            {subscribed ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg"
+              >
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="font-bold text-green-800 text-sm">You're subscribed!</p>
+                  <p className="text-xs text-green-600">Thank you for joining.</p>
+                </div>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="space-y-3">
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
+                  disabled={loading}
+                />
+                {error && (
+                  <p className="text-xs text-red-600">{error}</p>
+                )}
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Subscribing...
+                    </>
+                  ) : (
+                    'Subscribe'
+                  )}
+                </button>
+              </form>
+            )}
+            
+            {/* Footer text */}
+            <p className="text-xs text-slate-500 text-center pt-2">
+              Join our newsletter to get monthly updates on new tools and features
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Past Issues Card - Right */}
+      <div className="md:col-span-1">
+        <div className="space-y-4">
+          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Past Issues</h4>
+          {pastIssues.length > 0 ? (
+            pastIssues.map((issue: any) => (
+              <a key={issue.id} href={issue.link} className="block p-4 rounded-lg bg-white hover:shadow-lg border border-indigo-100 hover:border-indigo-300 transition-all duration-300 group">
+                <div className="text-xs text-indigo-500 font-mono mb-1">{issue.month || issue.issue_number || ''}</div>
+                <div className="text-sm text-slate-800 font-bold group-hover:text-indigo-700">{issue.title}</div>
+              </a>
+            ))
+          ) : (
+            <div className="text-sm text-slate-500 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              No past issues yet
             </div>
           )}
-          
-          {/* Subscribe Form */}
-          {subscribed ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg"
-            >
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <div>
-                <p className="font-bold text-green-800 text-sm">You're subscribed!</p>
-                <p className="text-xs text-green-600">Thank you for joining.</p>
-              </div>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubscribe} className="space-y-3">
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address" 
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
-                disabled={loading}
-              />
-              {error && (
-                <p className="text-xs text-red-600">{error}</p>
-              )}
-              <button 
-                type="submit"
-                disabled={loading}
-                className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Subscribing...
-                  </>
-                ) : (
-                  'Subscribe'
-                )}
-              </button>
-            </form>
-          )}
-          
-          {/* Footer text */}
-          <p className="text-xs text-slate-500 text-center pt-2">
-            Join our newsletter to get monthly updates on new tools and features
-          </p>
         </div>
       </div>
     </div>
