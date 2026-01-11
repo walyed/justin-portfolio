@@ -252,7 +252,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
   return (
     <div className="relative w-full h-[85vh] lg:h-screen overflow-hidden border-b border-white/5 bg-[#000205]">
       {/* Particle Neural Network Background */}
-      <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-auto" />
       <div className="absolute top-[65%] left-0 w-full h-[150px] bg-violet-600/10 blur-[80px] pointer-events-none" />
       
       {/* Hero Content */}
@@ -278,7 +278,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative w-full max-w-md md:max-w-lg lg:max-w-xl h-64 md:h-80 lg:h-96 mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+          className="relative w-full max-w-lg md:max-w-xl lg:max-w-2xl h-72 md:h-96 lg:h-[28rem] mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10 pointer-events-none"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -301,7 +301,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
           
           {/* Slide indicators */}
           {images.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2 pointer-events-auto">
               {images.map((_, idx) => (
                 <button
                   key={idx}
@@ -317,14 +317,16 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
           )}
         </motion.div>
 
-        {/* Name - Centered below image */}
+        {/* Name - Centered below image with hover effect */}
         <motion.h1 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight mb-12 text-center pointer-events-none"
+          className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight mb-12 text-center relative pointer-events-auto cursor-default group/name"
         >
-          {heroData.name}
+          <span className="relative inline-block transition-all duration-200 group-hover/name:[text-shadow:-4px_0_#00ffff,4px_0_#ff00ff,0_0_30px_rgba(255,255,255,0.5)]">
+            {heroData.name}
+          </span>
         </motion.h1>
 
         {/* Stats Row - Bottom */}
