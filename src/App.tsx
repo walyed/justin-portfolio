@@ -802,15 +802,15 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
     : [];
 
   return (
-    <div className="grid md:grid-cols-3 gap-6">
+    <div className="grid md:grid-cols-3 gap-6 items-start">
       {/* Left Column: Current + Newsletter Stacked */}
       <div className="md:col-span-2 space-y-6">
         {/* Current Card - Top */}
-        <div className="w-full max-w-md bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-6">
-          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-5">Current</h4>
+        <div className="w-full max-w-md bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Current</h4>
           {currentIssue ? (
             <a href={currentIssue.link || '#'} className="block group">
-              <div className="text-sm text-indigo-500 font-mono mb-3">{currentIssue.month || currentMonth}</div>
+              <div className="text-sm text-indigo-500 font-mono mb-4">{currentIssue.month || currentMonth}</div>
               <h5 className="text-base text-slate-800 font-bold group-hover:text-indigo-700 transition-colors">{currentIssue.title}</h5>
             </a>
           ) : (
@@ -819,13 +819,13 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
         </div>
 
         {/* Newsletter Subscribe Card - Below Current (Smaller) */}
-        <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
-          <div className="p-5 space-y-3">
+        <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]">
+          <div className="p-6 space-y-4">
             {/* Title */}
             <h3 className="text-lg font-bold text-slate-900">Newsletter</h3>
             
             {/* Subscribe text */}
-            <p className="text-xs text-slate-600">Subscribe to get monthly updates</p>
+            <p className="text-sm text-slate-600">Subscribe to get monthly updates</p>
             
             {/* Subscribe Form */}
             {subscribed ? (
@@ -841,13 +841,13 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
                 </div>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubscribe} className="space-y-2">
+              <form onSubmit={handleSubscribe} className="space-y-3">
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email address" 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
                   disabled={loading}
                 />
                 {error && (
@@ -856,7 +856,7 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs"
+                  className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
                 >
                   {loading ? (
                     <>
@@ -880,8 +880,8 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
 
       {/* Past Issues Card - Right */}
       <div className="md:col-span-1">
-        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-6">
-          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-5">Past Issues</h4>
+        <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+          <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Issues</h4>
           {pastIssues.length > 0 ? (
             <div className="space-y-5">
               {pastIssues.map((issue: any) => (
