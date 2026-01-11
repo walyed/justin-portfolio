@@ -131,6 +131,21 @@ export interface HeroImage {
   is_active: boolean;
 }
 
+export interface Footer {
+  id?: number;
+  name: string;
+  roles: string[];
+  location: string;
+  education_title: string;
+  education_items: string[];
+  status_text: string;
+  status_available: boolean;
+  contact_email: string;
+  linkedin_url: string;
+  github_url: string;
+  email_url: string;
+}
+
 export interface PortfolioData {
   hero: HeroContent | null;
   heroImages: HeroImage[];
@@ -145,6 +160,7 @@ export interface PortfolioData {
   publications: Publication[];
   endorsements: Endorsement[];
   newsletterIssues: NewsletterIssue[];
+  footer: Footer | null;
   sectionLayouts: Record<string, SectionLayout>;
   loading: boolean;
   error: string | null;

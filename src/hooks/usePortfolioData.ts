@@ -6,6 +6,7 @@ import type {
   AboutContent, 
   Community,
   CommunityEvent,
+  Footer,
   SectionLayout,
   PortfolioData 
 } from '../types/portfolio';
@@ -21,6 +22,7 @@ export type {
   SpecialAward, 
   Community,
   CommunityEvent,
+  Footer,
   SectionLayout,
   Press, 
   Publication, 
@@ -75,6 +77,7 @@ export function usePortfolioData(): PortfolioData {
     publications: [],
     endorsements: [],
     newsletterIssues: [],
+    footer: null,
     sectionLayouts: {},
     loading: true,
     error: null,
@@ -97,6 +100,7 @@ export function usePortfolioData(): PortfolioData {
           publicationsRes,
           endorsementsRes,
           newsletterRes,
+          footerRes,
           layoutsRes,
         ] = await Promise.all([
           supabase.from('hero_content').select('*').single(),
@@ -112,6 +116,7 @@ export function usePortfolioData(): PortfolioData {
           supabase.from('publications').select('*').order('order_index'),
           supabase.from('endorsements').select('*').order('order_index'),
           supabase.from('newsletter_issues').select('*').order('order_index'),
+          supabase.from('footer').select('*').single(),
           supabase.from('section_layouts').select('*'),
         ]);
 
@@ -137,6 +142,7 @@ export function usePortfolioData(): PortfolioData {
           publications: publicationsRes.data || [],
           endorsements: endorsementsRes.data || [],
           newsletterIssues: newsletterRes.data || [],
+          footer: footerRes.data || null,
           sectionLayouts: layoutsMap,
           loading: false,
           error: null,
