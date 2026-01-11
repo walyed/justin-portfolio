@@ -278,7 +278,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl h-[45rem] md:h-[60rem] lg:h-[70rem] mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10 pointer-events-none"
+          className="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl h-[55rem] md:h-[70rem] lg:h-[80rem] mb-16 rounded-2xl overflow-hidden shadow-2xl border border-white/10 pointer-events-none"
         >
           <AnimatePresence mode="wait">
             <motion.div
