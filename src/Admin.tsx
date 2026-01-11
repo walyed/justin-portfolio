@@ -2395,30 +2395,67 @@ export default function Admin() {
           icon={Users} 
           isOpen={openSections.community} 
           onToggle={() => toggleSection('community')}
-          previewContent={communityContent && (
+          previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-emerald-500 pl-4">
-                <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm">Chapter 06</span>
+                <span className="text-emerald-600 font-bold tracking-widest uppercase text-sm">Chapter 05</span>
                 <h2 className="text-3xl font-black text-black">Community & Service</h2>
               </div>
-              <div className="relative bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-8 rounded-3xl shadow-lg">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-                    <Heart className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-slate-900 mb-2">{communityContent.title}</h3>
-                    <p className="text-slate-700 leading-relaxed mb-4">{communityContent.description}</p>
-                    {communityContent.cta_text && (
-                      <a href={communityContent.cta_link || '#'} className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-bold rounded-full hover:bg-emerald-700 transition-colors">
-                        {communityContent.cta_text} <ChevronRight className="w-4 h-4" />
+              <div className="flex md:flex-row flex-col gap-1 items-start">
+                {/* Left Column: Upcoming + Donate Stacked */}
+                <div className="flex-1 space-y-6 max-w-sm">
+                  {/* Upcoming Card - Top */}
+                  <div className="w-full bg-white rounded-lg border border-emerald-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+                    <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Upcoming</h4>
+                    {communityEvents.length > 0 ? (
+                      <a href={communityEvents[0].link || '#'} className="block group">
+                        <div className="text-sm text-emerald-500 font-mono mb-4">{communityEvents[0].month || 'January 2026'}</div>
+                        <h5 className="text-base text-slate-800 font-bold group-hover:text-emerald-700 transition-colors">{communityEvents[0].title}</h5>
+                        {communityEvents[0].description && (
+                          <p className="text-sm text-slate-600 mt-2">{communityEvents[0].description}</p>
+                        )}
                       </a>
+                    ) : (
+                      <div className="text-base text-slate-600">No upcoming event</div>
+                    )}
+                  </div>
+
+                  {/* Donate Card - Below Upcoming */}
+                  <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]">
+                    <div className="p-6 space-y-4">
+                      <h3 className="text-lg font-bold text-slate-900">{communityContent?.title || 'Silver AI Initiative'}</h3>
+                      <p className="text-sm text-slate-600">{communityContent?.description || 'Bridging the generational gap. We conduct seminars, provide books, and training to educate seniors in the AI era.'}</p>
+                      <a 
+                        href={communityContent?.cta_link || '#'} 
+                        className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 text-sm"
+                      >
+                        {communityContent?.cta_text || 'Donate via GoFundMe'} <ChevronRight className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Past Events Card - Right */}
+                <div className="flex-1 max-w-sm">
+                  <div className="bg-white rounded-lg border border-emerald-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+                    <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Events</h4>
+                    {communityEvents.length > 1 ? (
+                      <div className="space-y-5">
+                        {communityEvents.slice(1).map((event) => (
+                          <a key={event.id} href={event.link || '#'} className="block group">
+                            <div className="text-sm text-emerald-500 font-mono mb-3">{event.month || ''}</div>
+                            <h5 className="text-base text-slate-800 font-bold group-hover:text-emerald-700 transition-colors">{event.title}</h5>
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-base text-slate-600">No past events yet</div>
                     )}
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          }
         >
           <div className="space-y-6">
             {/* Community Content */}
