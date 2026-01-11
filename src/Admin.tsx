@@ -576,6 +576,7 @@ interface NewsletterIssue {
   id?: number;
   title: string;
   link: string;
+  month?: string;
   order_index: number;
 }
 
@@ -2835,36 +2836,50 @@ export default function Admin() {
             {/* Past Issues Section */}
             <div className="space-y-4">
               <h3 className="font-bold text-slate-700">Past Issues</h3>
-              {newsletterIssues.map((item, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            {newsletterIssues.map((item, index) => (
+              <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
+                <div className="flex items-center gap-2">
                   <GripVertical className="w-4 h-4 text-slate-400 cursor-move" />
-                  <input
-                    type="text"
-                    value={item.title}
-                    onChange={(e) => {
-                      const updated = [...newsletterIssues];
-                      updated[index] = { ...item, title: e.target.value };
-                      setNewsletterIssues(updated);
-                    }}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
-                    placeholder="Issue Title"
-                  />
-                  <input
-                    type="text"
-                    value={item.link}
-                    onChange={(e) => {
-                      const updated = [...newsletterIssues];
-                      updated[index] = { ...item, link: e.target.value };
-                      setNewsletterIssues(updated);
-                    }}
-                    className="w-48 px-3 py-2 border border-slate-300 rounded-lg"
-                    placeholder="Link"
-                  />
-                  <button onClick={() => deleteNewsletterIssue(index)} className="text-red-500 hover:text-red-700">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <span className="text-xs font-medium text-slate-500">Issue {index + 1}</span>
                 </div>
-              ))}
+                <input
+                  type="text"
+                  value={item.month || ''}
+                  onChange={(e) => {
+                    const updated = [...newsletterIssues];
+                    updated[index] = { ...item, month: e.target.value };
+                    setNewsletterIssues(updated);
+                  }}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder="Month (e.g., December 2025)"
+                />
+                <input
+                  type="text"
+                  value={item.title}
+                  onChange={(e) => {
+                    const updated = [...newsletterIssues];
+                    updated[index] = { ...item, title: e.target.value };
+                    setNewsletterIssues(updated);
+                  }}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  placeholder="Issue Title"
+                />
+                <input
+                  type="text"
+                  value={item.link}
+                  onChange={(e) => {
+                    const updated = [...newsletterIssues];
+                    updated[index] = { ...item, link: e.target.value };
+                    setNewsletterIssues(updated);
+                  }}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                  placeholder="Link"
+                />
+                <button onClick={() => deleteNewsletterIssue(index)} className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm">
+                  <Trash2 className="w-4 h-4" /> Delete
+                </button>
+              </div>
+            ))}
               <div className="flex gap-3">
                 <button onClick={addNewsletterIssue} className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">
                   <Plus className="w-4 h-4" /> Add Issue
