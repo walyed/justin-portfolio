@@ -2501,10 +2501,102 @@ export default function Admin() {
                 </div>
               </div>
               <button onClick={saveCommunityContent} disabled={saving} className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-                <Save className="w-4 h-4" /> Save Community
+                <Save className="w-4 h-4" /> Save Community Info
               </button>
             </div>
-          )}
+            )}
+
+            {/* Community Events Section */}
+            <div className="space-y-4">
+              {/* Info Box */}
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  How Events are Displayed
+                </h4>
+                <ul className="text-sm text-blue-800 space-y-1 ml-6 list-disc">
+                  <li><strong>Upcoming Card:</strong> The first event (Event 1) will be displayed in the "Upcoming" card on the main website.</li>
+                  <li><strong>Past Events Card:</strong> All other events (Event 2, Event 3, etc.) will be displayed in the "Past Events" card.</li>
+                  <li>Drag events to reorder them - the first event in the list becomes the "Upcoming" event.</li>
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-slate-700">Community Events</h3>
+                <span className="text-xs text-slate-500">Drag to reorder • First event = Upcoming, Rest = Past Events</span>
+              </div>
+              {communityEvents.map((item, index) => (
+                <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GripVertical className="w-4 h-4 text-slate-400 cursor-move" />
+                      <span className="text-xs font-medium text-slate-500">Event {index + 1}</span>
+                    </div>
+                    {index === 0 ? (
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">UPCOMING</span>
+                    ) : (
+                      <span className="px-2 py-1 bg-slate-200 text-slate-600 text-xs font-bold rounded-full">PAST EVENT</span>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={item.month || ''}
+                    onChange={(e) => {
+                      const updated = [...communityEvents];
+                      updated[index] = { ...item, month: e.target.value };
+                      setCommunityEvents(updated);
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    placeholder="Month (e.g., January 2026)"
+                  />
+                  <input
+                    type="text"
+                    value={item.title}
+                    onChange={(e) => {
+                      const updated = [...communityEvents];
+                      updated[index] = { ...item, title: e.target.value };
+                      setCommunityEvents(updated);
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    placeholder="Event Title"
+                  />
+                  <textarea
+                    value={item.description || ''}
+                    onChange={(e) => {
+                      const updated = [...communityEvents];
+                      updated[index] = { ...item, description: e.target.value };
+                      setCommunityEvents(updated);
+                    }}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    placeholder="Event Description (optional)"
+                  />
+                  <input
+                    type="text"
+                    value={item.link}
+                    onChange={(e) => {
+                      const updated = [...communityEvents];
+                      updated[index] = { ...item, link: e.target.value };
+                      setCommunityEvents(updated);
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    placeholder="Link"
+                  />
+                  <button onClick={() => deleteCommunityEvent(index)} className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm">
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </button>
+                </div>
+              ))}
+              <div className="flex gap-3">
+                <button onClick={addCommunityEvent} className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">
+                  <Plus className="w-4 h-4" /> Add Event
+                </button>
+                <button onClick={saveCommunityEvents} disabled={saving} className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                  <Save className="w-4 h-4" /> Save All Events
+                </button>
+              </div>
+            </div>
+          </div>
         </SectionWrapper>
 
         {/* Press Section */}
