@@ -1,0 +1,6 @@
+/* App-specific styles - Vite demo styles removed */
+
+#root {
+  min-height: 100vh;
+  /* Removed: max-width, margin, padding, text-align that compressed layout */
+}

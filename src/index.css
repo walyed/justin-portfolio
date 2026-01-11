@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Tailwind's preflight handles resets - removed manual * { margin: 0 } that broke Tailwind spacing */
+
+html {
+  scroll-behavior: smooth;
+}
+
+#root {
+  min-height: 100vh;
+}
