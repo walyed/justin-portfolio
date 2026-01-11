@@ -1406,10 +1406,14 @@ const App = () => {
                         <NewsletterForm portfolioData={portfolioData} />
                     </Section>
 
-                    {/* FOOTER SECTION */}
-                    <footer className="pt-8 pb-6 border-t border-slate-200 mt-12 bg-white text-slate-900 w-full">
-                      {portfolioData.footer && (
-                        <div className="w-full px-4 py-6">
+                </div>
+            </div>
+          </div>
+
+          {/* FOOTER SECTION - Full Width Below Sidebar */}
+          <footer className="w-full border-t border-slate-200 mt-12 bg-white text-slate-900">
+            {portfolioData.footer && (
+              <div className="max-w-7xl mx-auto px-4 py-6">
                           <div className="grid md:grid-cols-2 gap-8">
                             {/* Left Side - Social Media Links */}
                             <div className="space-y-4">
@@ -1492,12 +1496,10 @@ const App = () => {
                           <div className="mt-6 pt-4 border-t border-slate-200 text-center text-slate-500 text-xs">
                             &copy; 2026 {portfolioData.footer.name}. Built to Innovate.
                           </div>
-                        </div>
-                      )}
-                    </footer>
-                </div>
-            </div>
-          </div>
+              </div>
+            )}
+          </footer>
+        </div>
         </div>
       </main>
     </div>
