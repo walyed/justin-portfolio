@@ -1500,7 +1500,6 @@ const App = () => {
             )}
           </footer>
         </div>
-        </div>
       </main>
     </div>
   );
