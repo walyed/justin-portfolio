@@ -256,7 +256,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
       <div className="absolute top-[65%] left-0 w-full h-[150px] bg-violet-600/10 blur-[80px] pointer-events-none" />
       
       {/* Hero Content */}
-      <div className="relative z-10 h-full w-full flex flex-col items-center justify-center px-4">
+      <div className="relative z-10 h-full w-full flex flex-col items-center justify-center px-4 pointer-events-none">
         {/* Badge and Subtitle - Above Image */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
