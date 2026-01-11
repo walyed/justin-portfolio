@@ -1432,6 +1432,41 @@ export default function Admin() {
     setSaving(false);
   };
 
+  // CRUD for Community Events
+  const addCommunityEvent = () => {
+    setCommunityEvents([...communityEvents, {
+      title: 'New Event',
+      description: '',
+      link: '#',
+      month: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      order_index: communityEvents.length
+    }]);
+  };
+
+  const deleteCommunityEvent = async (index: number) => {
+    const item = communityEvents[index];
+    if (item.id) {
+      await supabase.from('community_events').delete().eq('id', item.id);
+    }
+    setCommunityEvents(communityEvents.filter((_, i) => i !== index));
+  };
+
+  const saveCommunityEvents = async () => {
+    setSaving(true);
+    for (let i = 0; i < communityEvents.length; i++) {
+      const item = { ...communityEvents[i], order_index: i };
+      if (item.id) {
+        await supabase.from('community_events').update(item).eq('id', item.id);
+      } else {
+        const { data } = await supabase.from('community_events').insert(item).select().single();
+        if (data) communityEvents[i] = data;
+      }
+    }
+    setCommunityEvents([...communityEvents]);
+    showNotification('success', 'Community events saved!');
+    setSaving(false);
+  };
+
   // CRUD for Newsletter
   const addNewsletterIssue = () => {
     setNewsletterIssues([...newsletterIssues, {
