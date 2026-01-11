@@ -1,10 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-const supabaseUrl = 'https://lrwpfndkkdfesmjdtupg.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxyd3BmbmRra2RmZXNtamR0dXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODcyOTQsImV4cCI6MjA4MzY2MzI5NH0.NmdskLsD1kOeYcV-WA11k6DDBxre-5snZuqWba7MAeU';
+// Load from environment variables (set in .env file)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables. Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in .env file');
+}
+
+export const supabase = createClient<Database>(supabaseUrl || '', supabaseAnonKey || '');
 
 // Helper function for image uploads
 export const uploadImage = async (file: File, bucket: string, path: string): Promise<string | null> => {
