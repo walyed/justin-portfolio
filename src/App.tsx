@@ -1494,7 +1494,6 @@ const App = () => {
                               </div>
                             </div>
                           </div>
-                  </div>
                   <div className="mt-6 pt-4 border-t border-slate-200 text-center text-slate-500 text-xs">
                     &copy; 2026 {portfolioData.footer.name}. Built to Innovate.
                   </div>
