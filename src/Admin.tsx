@@ -1030,7 +1030,7 @@ export default function Admin() {
     setLoading(true);
     try {
       const [
-        heroRes, heroImagesRes, aboutRes, communityRes, communityEventsRes, projectsRes, leadershipRes,
+        heroRes, heroImagesRes, aboutRes, communityRes, communityEventsRes, footerRes, projectsRes, leadershipRes,
         awardsRes, specialAwardsRes, pressRes, publicationsRes, endorsementsRes, newsletterRes, subscribersRes
       ] = await Promise.all([
         supabase.from('hero_content').select('*').single(),
@@ -1038,6 +1038,7 @@ export default function Admin() {
         supabase.from('about_content').select('*').single(),
         supabase.from('community').select('*').single(),
         supabase.from('community_events').select('*').order('order_index'),
+        supabase.from('footer').select('*').single(),
         supabase.from('projects').select('*').order('order_index'),
         supabase.from('leadership').select('*').order('order_index'),
         supabase.from('awards').select('*').order('order_index'),
