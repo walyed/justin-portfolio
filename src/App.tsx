@@ -471,7 +471,12 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
   return (
     <div className="grid md:grid-cols-3 gap-6">
       <div className="md:col-span-2 bg-white p-8 rounded-2xl border border-indigo-100 shadow-lg relative overflow-hidden">
-        <ColoredBlob color="indigo" />
+        {/* Decorative blob */}
+        <motion.div 
+          className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-200 rounded-full blur-3xl opacity-50 pointer-events-none"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.3, 0.5] }}
+          transition={{ duration: 5, repeat: Infinity }}
+        />
         <div className="relative z-10">
           <h3 className="text-2xl font-bold text-slate-900 mb-4">Join the Conversation</h3>
           
