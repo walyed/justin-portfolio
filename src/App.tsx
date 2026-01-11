@@ -790,47 +790,59 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
     }
   };
 
+  // Get current/latest newsletter issue month
+  const currentIssue = portfolioData.newsletterIssues && portfolioData.newsletterIssues.length > 0 
+    ? portfolioData.newsletterIssues[0] 
+    : null;
+  const currentMonth = currentIssue?.month || 'December 2025';
+
   return (
-    <div className="grid md:grid-cols-3 gap-6">
-      <div className="md:col-span-2 bg-white p-8 rounded-2xl border border-indigo-100 shadow-lg relative overflow-hidden">
-        {/* Decorative blob */}
-        <motion.div 
-          className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-200 rounded-full blur-3xl opacity-50 pointer-events-none"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.3, 0.5] }}
-          transition={{ duration: 5, repeat: Infinity }}
-        />
-        <div className="relative z-10">
-          <h3 className="text-2xl font-bold text-slate-900 mb-4">Join the Conversation</h3>
+    <div className="flex justify-center">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+        <div className="p-6 space-y-4">
+          {/* Title */}
+          <h3 className="text-xl font-bold text-slate-900">Newsletter</h3>
           
+          {/* Subscribe text */}
+          <p className="text-sm text-slate-600">Subscribe to get monthly updates</p>
+          
+          {/* Current Month Section */}
+          {currentMonth && (
+            <div className="py-3 border-y border-slate-200">
+              <p className="text-base font-medium text-slate-900">{currentMonth}</p>
+            </div>
+          )}
+          
+          {/* Subscribe Form */}
           {subscribed ? (
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg"
             >
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <CheckCircle className="w-5 h-5 text-green-600" />
               <div>
-                <p className="font-bold text-green-800">You're subscribed!</p>
-                <p className="text-sm text-green-600">Thank you for joining. You'll receive updates soon.</p>
+                <p className="font-bold text-green-800 text-sm">You're subscribed!</p>
+                <p className="text-xs text-green-600">Thank you for joining.</p>
               </div>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubscribe}>
+            <form onSubmit={handleSubscribe} className="space-y-3">
               <input 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email address" 
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-indigo-400 placeholder-slate-400 transition-all" 
                 disabled={loading}
               />
               {error && (
-                <p className="mt-2 text-sm text-red-600">{error}</p>
+                <p className="text-xs text-red-600">{error}</p>
               )}
               <button 
                 type="submit"
                 disabled={loading}
-                className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
               >
                 {loading ? (
                   <>
@@ -843,18 +855,12 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
               </button>
             </form>
           )}
+          
+          {/* Footer text */}
+          <p className="text-xs text-slate-500 text-center pt-2">
+            Join our newsletter to get monthly updates on new tools and features
+          </p>
         </div>
-      </div>
-      <div className="space-y-6">
-        <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Past Issues</h4>
-        {(portfolioData.newsletterIssues.length > 0 ? portfolioData.newsletterIssues : [
-          { id: 1, title: "The Ethics of BCI Data", link: "#" },
-          { id: 2, title: "Generative AI in School", link: "#" }
-        ]).map((issue: any) => (
-          <a key={issue.id} href={issue.link} className="block p-4 rounded-lg bg-white hover:shadow-lg border border-indigo-100 hover:border-indigo-300 transition-all duration-300 group">
-            <div className="text-sm text-slate-800 font-bold group-hover:text-indigo-700">{issue.title}</div>
-          </a>
-        ))}
       </div>
     </div>
   );

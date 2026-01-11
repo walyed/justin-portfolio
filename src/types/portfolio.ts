@@ -101,6 +101,7 @@ export interface NewsletterIssue {
   title: string;
   issue_number?: string;
   link: string;
+  month?: string; // e.g., "December 2025"
 }
 
 export interface SectionLayout {
