@@ -641,6 +641,21 @@ interface CommunityContent {
   cta_link: string;
 }
 
+interface Footer {
+  id?: number;
+  name: string;
+  roles: string[];
+  location: string;
+  education_title: string;
+  education_items: string[];
+  status_text: string;
+  status_available: boolean;
+  contact_email: string;
+  linkedin_url: string;
+  github_url: string;
+  email_url: string;
+}
+
 // Reusable Components
 const ImageUploader = ({ currentUrl, onUpload, label }: { currentUrl: string; onUpload: (url: string) => void; label: string }) => {
   const [uploading, setUploading] = useState(false);
@@ -910,6 +925,7 @@ export default function Admin() {
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
   const [communityContent, setCommunityContent] = useState<CommunityContent | null>(null);
+  const [footer, setFooter] = useState<Footer | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [leadership, setLeadership] = useState<Leadership[]>([]);
   const [awards, setAwards] = useState<AwardItem[]>([]);
@@ -1038,6 +1054,7 @@ export default function Admin() {
       if (aboutRes.data) setAboutContent(aboutRes.data);
       if (communityRes.data) setCommunityContent(communityRes.data);
       if (communityEventsRes.data) setCommunityEvents(communityEventsRes.data);
+      if (footerRes.data) setFooter(footerRes.data);
       if (projectsRes.data) setProjects(projectsRes.data);
       if (leadershipRes.data) setLeadership(leadershipRes.data);
       if (awardsRes.data) setAwards(awardsRes.data);
@@ -1150,6 +1167,15 @@ export default function Admin() {
     const { error } = await supabase.from('community').upsert({ ...communityContent, id: 1 });
     if (error) showNotification('error', 'Failed to save community content');
     else showNotification('success', 'Community content saved!');
+    setSaving(false);
+  };
+
+  const saveFooter = async () => {
+    if (!footer) return;
+    setSaving(true);
+    const { error } = await supabase.from('footer').upsert({ ...footer, id: 1 });
+    if (error) showNotification('error', 'Failed to save footer');
+    else showNotification('success', 'Footer saved!');
     setSaving(false);
   };
 
