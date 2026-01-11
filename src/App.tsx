@@ -293,7 +293,7 @@ const ParticleHero = ({ heroData }: { heroData: HeroContent }) => {
             </motion.div>
 
             {/* Stats Row */}
-            <motion.div 
+                <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.9 }}
@@ -314,8 +314,8 @@ const ParticleHero = ({ heroData }: { heroData: HeroContent }) => {
                 <div>
                     <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_4_value}</div>
                     <div className="text-xs text-violet-400 uppercase tracking-wider mt-1">{heroData.stat_4_label}</div>
-                </div>
-            </motion.div>
+                   </div>
+                </motion.div>
         </div>
     </div>
   );
@@ -698,7 +698,7 @@ const App = () => {
                                                 <p className="text-slate-600 text-sm mb-3">{item.role}</p>
                                                 <div className="text-xs text-violet-500 font-mono flex items-center gap-1"><IconComponent className="w-3 h-3" /> {item.organization}</div>
                                                 {item.link && <div className="mt-2 text-xs text-violet-400 flex items-center gap-1">🔗 Click to open</div>}
-                                            </div>
+                                    </div>
                                         </CardWrapper>
                                     )})}
                                 </div>
@@ -708,9 +708,65 @@ const App = () => {
 
                     {/* PORTFOLIO PROJECTS SECTION */}
                     <Section id="projects" title="Portfolio Projects" chapter="Chapter 03" color="blue" borderColor="border-blue-500">
-                        <div className="space-y-6">
-                            {projects.map((p) => <HoloCard key={p.id} project={p} />)}
+                        {(() => {
+                            const layout = portfolioData.sectionLayouts['projects'];
+                            const isHorizontal = layout?.card_direction === 'horizontal';
+                            const showImage = layout?.show_image !== false;
+                            const imagePosition = layout?.image_position || 'left';
+                            const imageSize = layout?.image_size || 'md';
+                            
+                            // Image size classes
+                            const imageSizeClass = imageSize === 'sm' ? 'w-1/4' : imageSize === 'lg' ? 'w-1/2' : imageSize === 'full' ? 'w-full' : 'w-5/12';
+                            
+                            return (
+                                <div className={`${getLayoutClass(layout?.layout)} ${getGapClass(layout?.gap)}`}>
+                                    {projects.map((p) => {
+                                        const CardWrapper = p.link ? 'a' : 'div';
+                                        const cardProps = p.link ? { href: p.link, target: '_blank', rel: 'noopener noreferrer' } : {};
+                                        
+                                        // Determine flex direction based on layout settings
+                                        const flexDirection = isHorizontal 
+                                            ? (imagePosition === 'right' ? 'flex-row-reverse' : 'flex-row')
+                                            : (imagePosition === 'top' ? 'flex-col' : 'flex-col-reverse');
+                                        
+                                        return (
+                                            <CardWrapper 
+                                                key={p.id} 
+                                                {...cardProps}
+                                                className={`relative w-full rounded-xl bg-white shadow-xl border border-slate-200 group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 hover:border-blue-300 flex ${flexDirection} h-full ${p.link ? 'cursor-pointer' : ''}`}
+                                            >
+                                                {showImage && p.image && (
+                                                    <div className={`relative ${isHorizontal ? imageSizeClass : 'w-full'} ${isHorizontal ? 'h-auto min-h-[200px]' : 'h-64'} overflow-hidden flex-shrink-0`}>
+                                                        <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden opacity-30">
+                                                            <div className="w-full h-[2px] bg-cyan-400/80 shadow-[0_0_10px_#22d3ee] absolute top-0 animate-scanline" />
+                                        </div>
+                                                        <div 
+                                                            className="w-full h-full bg-cover bg-center transition-all duration-700 group-hover:scale-105 group-hover:filter-none scale-100 grayscale contrast-125 brightness-100"
+                                                            style={{ backgroundImage: `url(${p.image})` }} 
+                                                        />
+                                    </div>
+                                                )}
+                                                <div className="p-8 flex flex-col justify-center flex-1">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <span className="text-[10px] uppercase tracking-widest text-blue-600 font-mono">{p.id}</span>
+                                                        {p.status === 'Active' && <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />}
+                                </div>
+                                                    <h4 className="text-2xl font-bold text-slate-900 mb-2">{p.title}</h4>
+                                                    <div className="text-violet-600 text-xs font-bold uppercase mb-4 tracking-wider">{p.role}</div>
+                                                    <p className="text-slate-600 text-sm mb-6 leading-relaxed">{p.description}</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {p.stack.map((tech: string, i: number) => (
+                                                            <span key={i} className="px-2 py-1 bg-violet-50 rounded text-xs text-violet-700 border border-violet-100 font-mono font-semibold">{tech}</span>
+                            ))}
                         </div>
+                                                    {p.link && <div className="mt-4 text-xs text-blue-400 flex items-center gap-1">🔗 Click to view project</div>}
+                                </div>
+                                            </CardWrapper>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })()}
                     </Section>
 
                     {/* AWARDS & RECOGNITION SECTION */}
@@ -865,20 +921,26 @@ const App = () => {
 
                     {/* PUBLICATIONS SECTION */}
                     <Section id="publications" title="Publications" chapter="Chapter 07" color="cyan" borderColor="border-cyan-500">
-                        <div className="space-y-6">
-                            {(portfolioData.publications.length > 0 ? portfolioData.publications : [
-                                { id: 1, title: "Scintix: AI-Driven Radiotherapy at Stanford", description: "Technical analysis of RefleXion's biology-guided radiotherapy.", platform: "MEDIUM", link: "https://medium.com/@joel.amaldas/scintix-how-ai-driven-radiotherapy-from-reflexion-is-revolutionizing-cancer-treatment-at-stanford-2575b5e43755" }
-                            ]).map(pub => (
-                                <a key={pub.id} href={pub.link} target="_blank" className="relative block p-6 rounded-xl bg-white shadow-lg border border-cyan-100 hover:shadow-xl hover:-translate-y-1 hover:border-cyan-400 transition-all duration-300 group overflow-hidden">
-                                    <ColoredBlob color="cyan" />
-                                    <div className="relative z-10">
-                                        <div className="text-cyan-600 text-xs font-bold mb-1 uppercase tracking-wide">{pub.platform}</div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-cyan-800 transition-colors">{pub.title}</h3>
-                                        <p className="text-sm text-slate-600">{pub.description}</p>
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
+                        {(() => {
+                            const layout = portfolioData.sectionLayouts['publications'];
+                            const isHorizontal = layout?.card_direction === 'horizontal';
+                            return (
+                                <div className={`${getLayoutClass(layout?.layout)} ${getGapClass(layout?.gap)}`}>
+                                    {(portfolioData.publications.length > 0 ? portfolioData.publications : [
+                                        { id: 1, title: "Scintix: AI-Driven Radiotherapy at Stanford", description: "Technical analysis of RefleXion's biology-guided radiotherapy.", platform: "MEDIUM", link: "https://medium.com/@joel.amaldas/scintix-how-ai-driven-radiotherapy-from-reflexion-is-revolutionizing-cancer-treatment-at-stanford-2575b5e43755" }
+                                    ]).map(pub => (
+                                        <a key={pub.id} href={pub.link} target="_blank" rel="noopener noreferrer" className={`relative block p-6 rounded-xl bg-white shadow-lg border border-cyan-100 hover:shadow-xl hover:-translate-y-1 hover:border-cyan-400 transition-all duration-300 group overflow-hidden ${isHorizontal ? 'flex items-center gap-4' : ''}`}>
+                                <ColoredBlob color="cyan" />
+                                            <div className={`relative z-10 ${isHorizontal ? 'flex-1' : ''}`}>
+                                                <div className="text-cyan-600 text-xs font-bold mb-1 uppercase tracking-wide">{pub.platform}</div>
+                                                <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-cyan-800 transition-colors">{pub.title}</h3>
+                                                <p className="text-sm text-slate-600">{pub.description}</p>
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            );
+                        })()}
                     </Section>
 
                     {/* ENDORSEMENTS SECTION */}
@@ -911,7 +973,7 @@ const App = () => {
                                             </div>
                                         </CardWrapper>
                                     )})}
-                                </div>
+                        </div>
                             );
                         })()}
                     </Section>
