@@ -4,7 +4,7 @@ import {
   LogOut, Save, Plus, Trash2, ChevronDown, ChevronRight, 
   Upload, X, GripVertical, Home, User, Briefcase, FolderOpen,
   Award, Users, Newspaper, BookOpen, Quote, Mail, Settings,
-  Eye, EyeOff, Maximize2, AlignLeft, AlignCenter, AlignRight, Heart
+  Eye, EyeOff, Maximize2, AlignLeft, AlignCenter, AlignRight, Heart, Trophy
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
@@ -1714,6 +1714,137 @@ export default function Admin() {
               </button>
             </div>
           )}
+
+          {/* Hero Images Management */}
+          <div className="mt-8 pt-8 border-t border-slate-200 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-700">Hero Images</h3>
+                <p className="text-sm text-slate-500">Upload and manage images for the hero slideshow</p>
+              </div>
+              <button onClick={addHeroImage} className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">
+                <Plus className="w-4 h-4" /> Add Image
+              </button>
+            </div>
+
+            {/* Frame Size Control */}
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <label className="block text-sm font-medium text-slate-700 mb-2">Image Frame Size</label>
+              <div className="flex gap-2">
+                {(['small', 'medium', 'large'] as const).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setHeroFrameSize(size)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      heroFrameSize === size
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    {size.charAt(0).toUpperCase() + size.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Images List */}
+            {heroImages.length === 0 ? (
+              <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+                <Upload className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>No images yet. Click "Add Image" to get started.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {heroImages.map((image, index) => (
+                  <div key={index} className="bg-white border border-slate-200 rounded-lg p-4">
+                    <div className="flex gap-4">
+                      {/* Image Preview */}
+                      <div className="flex-shrink-0">
+                        {image.image_url ? (
+                          <div className="w-24 h-24 rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
+                            <img src={image.image_url} alt={image.alt_text} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-24 h-24 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50">
+                            <Upload className="w-6 h-6 text-slate-400" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Image Details */}
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <GripVertical className="w-4 h-4 text-slate-400" />
+                          <span className="text-sm font-medium text-slate-600">Image {index + 1}</span>
+                        </div>
+                        
+                        {/* Upload Button */}
+                        <ImageUploader
+                          currentUrl={image.image_url}
+                          onUpload={(url) => updateHeroImage(index, { image_url: url })}
+                          label=""
+                        />
+
+                        {/* Alt Text */}
+                        <input
+                          type="text"
+                          value={image.alt_text}
+                          onChange={(e) => updateHeroImage(index, { alt_text: e.target.value })}
+                          placeholder="Alt text (optional)"
+                          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                        />
+
+                        {/* Brightness Control */}
+                        <div>
+                          <label className="block text-xs text-slate-600 mb-1">
+                            Brightness: {image.brightness}%
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="200"
+                            value={image.brightness}
+                            onChange={(e) => updateHeroImage(index, { brightness: parseInt(e.target.value) })}
+                            className="w-full"
+                          />
+                        </div>
+
+                        {/* Active Toggle */}
+                        <label className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={image.is_active}
+                            onChange={(e) => updateHeroImage(index, { is_active: e.target.checked })}
+                            className="rounded"
+                          />
+                          <span className="text-slate-600">Active (show in slideshow)</span>
+                        </label>
+                      </div>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => deleteHeroImage(index)}
+                        className="flex-shrink-0 text-red-500 hover:text-red-700 p-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Save Button */}
+            {heroImages.length > 0 && (
+              <button
+                onClick={saveHeroImages}
+                disabled={saving}
+                className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" /> Save All Images
+              </button>
+            )}
+          </div>
         </SectionWrapper>
 
         {/* About Section */}
