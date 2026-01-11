@@ -580,6 +580,15 @@ interface NewsletterIssue {
   order_index: number;
 }
 
+interface CommunityEvent {
+  id?: number;
+  title: string;
+  description?: string;
+  link: string;
+  month?: string;
+  order_index: number;
+}
+
 interface NewsletterSubscriber {
   id?: number;
   email: string;
@@ -1004,13 +1013,14 @@ export default function Admin() {
     setLoading(true);
     try {
       const [
-        heroRes, heroImagesRes, aboutRes, communityRes, projectsRes, leadershipRes,
+        heroRes, heroImagesRes, aboutRes, communityRes, communityEventsRes, projectsRes, leadershipRes,
         awardsRes, specialAwardsRes, pressRes, publicationsRes, endorsementsRes, newsletterRes, subscribersRes
       ] = await Promise.all([
         supabase.from('hero_content').select('*').single(),
         supabase.from('hero_images').select('*').order('order_index'),
         supabase.from('about_content').select('*').single(),
         supabase.from('community').select('*').single(),
+        supabase.from('community_events').select('*').order('order_index'),
         supabase.from('projects').select('*').order('order_index'),
         supabase.from('leadership').select('*').order('order_index'),
         supabase.from('awards').select('*').order('order_index'),
@@ -1026,6 +1036,7 @@ export default function Admin() {
       if (heroImagesRes.data) setHeroImages(heroImagesRes.data);
       if (aboutRes.data) setAboutContent(aboutRes.data);
       if (communityRes.data) setCommunityContent(communityRes.data);
+      if (communityEventsRes.data) setCommunityEvents(communityEventsRes.data);
       if (projectsRes.data) setProjects(projectsRes.data);
       if (leadershipRes.data) setLeadership(leadershipRes.data);
       if (awardsRes.data) setAwards(awardsRes.data);
@@ -2409,26 +2420,29 @@ export default function Admin() {
             </div>
           )}
         >
-          {communityContent && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
-                <input
-                  type="text"
-                  value={communityContent.title}
-                  onChange={(e) => setCommunityContent({ ...communityContent, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                <textarea
-                  value={communityContent.description}
-                  onChange={(e) => setCommunityContent({ ...communityContent, description: e.target.value })}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
+          <div className="space-y-6">
+            {/* Community Content */}
+            {communityContent && (
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-700">Community Info</h3>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    value={communityContent.title}
+                    onChange={(e) => setCommunityContent({ ...communityContent, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                  <textarea
+                    value={communityContent.description}
+                    onChange={(e) => setCommunityContent({ ...communityContent, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">CTA Button Text</label>
