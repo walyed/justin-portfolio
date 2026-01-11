@@ -802,7 +802,7 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
     : [];
 
   return (
-    <div className="flex md:flex-row flex-col gap-2 items-start">
+    <div className="flex md:flex-row flex-col gap-1 items-start">
       {/* Left Column: Current + Newsletter Stacked */}
       <div className="flex-1 space-y-6 max-w-sm">
         {/* Current Card - Top */}
