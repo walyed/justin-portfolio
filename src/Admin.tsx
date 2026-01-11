@@ -3217,7 +3217,7 @@ export default function Admin() {
           onToggle={() => toggleSection('footer')}
           previewContent={footer && (
             <div className="space-y-4">
-              <div className="bg-slate-900 text-white p-8 rounded-xl">
+              <div className="bg-white border border-slate-200 text-slate-900 p-8 rounded-xl">
                 <div className="grid md:grid-cols-2 gap-12">
                   <div className="space-y-4">
                     <h3 className="text-xl font-bold uppercase tracking-wider mb-6">Connect</h3>
