@@ -1414,7 +1414,7 @@ const App = () => {
           <footer className="w-full border-t border-slate-200 mt-12 bg-white text-slate-900">
             <div className="max-w-7xl mx-auto px-4 py-6">
               {portfolioData.footer ? (
-                <>
+                <div>
                   <div className="grid md:grid-cols-2 gap-8">
                             {/* Left Side - Social Media Links */}
                             <div className="space-y-4">
@@ -1498,7 +1498,7 @@ const App = () => {
                   <div className="mt-6 pt-4 border-t border-slate-200 text-center text-slate-500 text-xs">
                     &copy; 2026 {portfolioData.footer.name}. Built to Innovate.
                   </div>
-                </>
+                </div>
               ) : (
                 <div className="text-center text-slate-500 py-8">
                   <p className="text-sm">Footer content will appear here once configured in the admin panel.</p>
