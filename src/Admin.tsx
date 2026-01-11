@@ -2834,14 +2834,37 @@ export default function Admin() {
           }
         >
           <div className="space-y-6">
+            {/* Info Box */}
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+              <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                How Issues are Displayed
+              </h4>
+              <ul className="text-sm text-blue-800 space-y-1 ml-6 list-disc">
+                <li><strong>Current Card:</strong> The first issue (Issue 1) will be displayed in the "Current" card on the main website.</li>
+                <li><strong>Past Issues Card:</strong> All other issues (Issue 2, Issue 3, etc.) will be displayed in the "Past Issues" card.</li>
+                <li>Drag issues to reorder them - the first issue in the list becomes the "Current" issue.</li>
+              </ul>
+            </div>
+
             {/* Past Issues Section */}
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-700">Past Issues</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-slate-700">Newsletter Issues</h3>
+                <span className="text-xs text-slate-500">Drag to reorder • First issue = Current, Rest = Past Issues</span>
+              </div>
             {newsletterIssues.map((item, index) => (
               <div key={index} className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
-                <div className="flex items-center gap-2">
-                  <GripVertical className="w-4 h-4 text-slate-400 cursor-move" />
-                  <span className="text-xs font-medium text-slate-500">Issue {index + 1}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="w-4 h-4 text-slate-400 cursor-move" />
+                    <span className="text-xs font-medium text-slate-500">Issue {index + 1}</span>
+                  </div>
+                  {index === 0 ? (
+                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">CURRENT</span>
+                  ) : (
+                    <span className="px-2 py-1 bg-slate-200 text-slate-600 text-xs font-bold rounded-full">PAST ISSUE</span>
+                  )}
                 </div>
                 <input
                   type="text"
