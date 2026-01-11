@@ -804,9 +804,9 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
   return (
     <div className="grid md:grid-cols-3 gap-0 items-start">
       {/* Left Column: Current + Newsletter Stacked */}
-      <div className="md:col-span-2 space-y-6">
+      <div className="md:col-span-2 space-y-6 pr-0">
         {/* Current Card - Top */}
-        <div className="w-full max-w-md bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+        <div className="w-full bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
           <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Current</h4>
           {currentIssue ? (
             <a href={currentIssue.link || '#'} className="block group">
@@ -819,7 +819,7 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
         </div>
 
         {/* Newsletter Subscribe Card - Below Current (Smaller) */}
-        <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]">
+        <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]">
           <div className="p-6 space-y-4">
             {/* Title */}
             <h3 className="text-lg font-bold text-slate-900">Newsletter</h3>
@@ -879,7 +879,7 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
       </div>
 
       {/* Past Issues Card - Right */}
-      <div className="md:col-span-1">
+      <div className="md:col-span-1 pl-0">
         <div className="bg-white rounded-lg border border-indigo-100 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
           <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Issues</h4>
           {pastIssues.length > 0 ? (
