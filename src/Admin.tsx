@@ -3218,36 +3218,36 @@ export default function Admin() {
           previewContent={footer && (
             <div className="space-y-4">
               <div className="bg-white border border-slate-200 text-slate-900 p-8 rounded-xl">
-                <div className="grid md:grid-cols-2 gap-12">
+                <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-4">
-                    <h3 className="text-xl font-bold uppercase tracking-wider mb-6">Connect</h3>
+                    <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Connect</h3>
                     <div className="flex gap-6">
-                      <div className="w-10 h-10 rounded-lg bg-slate-800"></div>
-                      <div className="w-10 h-10 rounded-lg bg-slate-800"></div>
-                      <div className="w-10 h-10 rounded-lg bg-slate-800"></div>
+                      <div className="w-10 h-10 rounded-lg bg-slate-100"></div>
+                      <div className="w-10 h-10 rounded-lg bg-slate-100"></div>
+                      <div className="w-10 h-10 rounded-lg bg-slate-100"></div>
                     </div>
                   </div>
-                  <div className="grid md:grid-cols-3 gap-8">
+                  <div className="grid md:grid-cols-3 gap-6">
                     <div>
-                      <h4 className="text-lg font-bold uppercase mb-4">{footer.name}</h4>
-                      <ul className="space-y-2 text-slate-400 text-sm">
+                      <h4 className="text-lg font-bold uppercase mb-3">{footer.name}</h4>
+                      <ul className="space-y-1 text-slate-600 text-sm">
                         {footer.roles.slice(0, 2).map((role, idx) => (
                           <li key={idx}>{role}</li>
                         ))}
-                        <li>{footer.location}</li>
+                        <li className="text-slate-500">{footer.location}</li>
                       </ul>
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold uppercase mb-4">{footer.education_title}</h4>
-                      <ul className="space-y-2 text-slate-400 text-sm">
+                      <h4 className="text-lg font-bold uppercase mb-3">{footer.education_title}</h4>
+                      <ul className="space-y-1 text-slate-600 text-sm">
                         {footer.education_items.slice(0, 3).map((item, idx) => (
                           <li key={idx}>{item}</li>
                         ))}
                       </ul>
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold uppercase mb-4">Status</h4>
-                      <div className="space-y-2 text-slate-400 text-sm">
+                      <h4 className="text-lg font-bold uppercase mb-3">Status</h4>
+                      <div className="space-y-1 text-slate-600 text-sm">
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${footer.status_available ? 'bg-green-500' : 'bg-red-500'}`}></span>
                           <span>{footer.status_text}</span>
