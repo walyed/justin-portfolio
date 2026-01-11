@@ -579,6 +579,16 @@ interface NewsletterIssue {
   order_index: number;
 }
 
+interface NewsletterSubscriber {
+  id?: number;
+  email: string;
+  subscribed_at: string;
+  is_active: boolean;
+  source: string;
+  name?: string;
+  notes?: string;
+}
+
 interface HeroContent {
   id?: number;
   badge_text: string;
@@ -888,6 +898,7 @@ export default function Admin() {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [endorsements, setEndorsements] = useState<Endorsement[]>([]);
   const [newsletterIssues, setNewsletterIssues] = useState<NewsletterIssue[]>([]);
+  const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([]);
   
   // UI state
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ hero: true });
@@ -982,7 +993,7 @@ export default function Admin() {
     try {
       const [
         heroRes, aboutRes, communityRes, projectsRes, leadershipRes,
-        awardsRes, specialAwardsRes, pressRes, publicationsRes, endorsementsRes, newsletterRes
+        awardsRes, specialAwardsRes, pressRes, publicationsRes, endorsementsRes, newsletterRes, subscribersRes
       ] = await Promise.all([
         supabase.from('hero_content').select('*').single(),
         supabase.from('about_content').select('*').single(),
@@ -995,6 +1006,7 @@ export default function Admin() {
         supabase.from('publications').select('*').order('order_index'),
         supabase.from('endorsements').select('*').order('order_index'),
         supabase.from('newsletter_issues').select('*').order('order_index'),
+        supabase.from('newsletter_subscribers').select('*').order('subscribed_at', { ascending: false }),
       ]);
 
       if (heroRes.data) setHeroContent(heroRes.data);
@@ -1008,6 +1020,7 @@ export default function Admin() {
       if (publicationsRes.data) setPublications(publicationsRes.data);
       if (endorsementsRes.data) setEndorsements(endorsementsRes.data);
       if (newsletterRes.data) setNewsletterIssues(newsletterRes.data);
+      if (subscribersRes.data) setNewsletterSubscribers(subscribersRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -1372,6 +1385,56 @@ export default function Admin() {
     setNewsletterIssues([...newsletterIssues]);
     showNotification('success', 'Newsletter issues saved!');
     setSaving(false);
+  };
+
+  // Newsletter Subscribers Management
+  const toggleSubscriberStatus = async (id: number, currentStatus: boolean) => {
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .update({ is_active: !currentStatus })
+      .eq('id', id);
+    
+    if (!error) {
+      setNewsletterSubscribers(newsletterSubscribers.map(s => 
+        s.id === id ? { ...s, is_active: !currentStatus } : s
+      ));
+      showNotification('success', `Subscriber ${!currentStatus ? 'activated' : 'deactivated'}`);
+    } else {
+      showNotification('error', 'Failed to update subscriber status');
+    }
+  };
+
+  const deleteSubscriber = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this subscriber?')) return;
+    
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .delete()
+      .eq('id', id);
+    
+    if (!error) {
+      setNewsletterSubscribers(newsletterSubscribers.filter(s => s.id !== id));
+      showNotification('success', 'Subscriber deleted');
+    } else {
+      showNotification('error', 'Failed to delete subscriber');
+    }
+  };
+
+  const exportSubscribers = () => {
+    const activeSubscribers = newsletterSubscribers.filter(s => s.is_active);
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + "Email,Subscribed At,Status,Name,Notes\n"
+      + activeSubscribers.map(s => 
+          `${s.email},${new Date(s.subscribed_at).toLocaleDateString()},${s.is_active ? 'Active' : 'Inactive'},${s.name || ''},${s.notes || ''}`
+        ).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `newsletter_subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Login Screen
@@ -2566,45 +2629,135 @@ export default function Admin() {
             </div>
           }
         >
-          <div className="space-y-4">
-            <h3 className="font-bold text-slate-700">Past Issues</h3>
-            {newsletterIssues.map((item, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <GripVertical className="w-4 h-4 text-slate-400 cursor-move" />
-                <input
-                  type="text"
-                  value={item.title}
-                  onChange={(e) => {
-                    const updated = [...newsletterIssues];
-                    updated[index] = { ...item, title: e.target.value };
-                    setNewsletterIssues(updated);
-                  }}
-                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
-                  placeholder="Issue Title"
-                />
-                <input
-                  type="text"
-                  value={item.link}
-                  onChange={(e) => {
-                    const updated = [...newsletterIssues];
-                    updated[index] = { ...item, link: e.target.value };
-                    setNewsletterIssues(updated);
-                  }}
-                  className="w-48 px-3 py-2 border border-slate-300 rounded-lg"
-                  placeholder="Link"
-                />
-                <button onClick={() => deleteNewsletterIssue(index)} className="text-red-500 hover:text-red-700">
-                  <Trash2 className="w-4 h-4" />
+          <div className="space-y-6">
+            {/* Past Issues Section */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-slate-700">Past Issues</h3>
+              {newsletterIssues.map((item, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <GripVertical className="w-4 h-4 text-slate-400 cursor-move" />
+                  <input
+                    type="text"
+                    value={item.title}
+                    onChange={(e) => {
+                      const updated = [...newsletterIssues];
+                      updated[index] = { ...item, title: e.target.value };
+                      setNewsletterIssues(updated);
+                    }}
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
+                    placeholder="Issue Title"
+                  />
+                  <input
+                    type="text"
+                    value={item.link}
+                    onChange={(e) => {
+                      const updated = [...newsletterIssues];
+                      updated[index] = { ...item, link: e.target.value };
+                      setNewsletterIssues(updated);
+                    }}
+                    className="w-48 px-3 py-2 border border-slate-300 rounded-lg"
+                    placeholder="Link"
+                  />
+                  <button onClick={() => deleteNewsletterIssue(index)} className="text-red-500 hover:text-red-700">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex gap-3">
+                <button onClick={addNewsletterIssue} className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">
+                  <Plus className="w-4 h-4" /> Add Issue
+                </button>
+                <button onClick={saveNewsletterIssues} disabled={saving} className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                  <Save className="w-4 h-4" /> Save All
                 </button>
               </div>
-            ))}
-            <div className="flex gap-3">
-              <button onClick={addNewsletterIssue} className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">
-                <Plus className="w-4 h-4" /> Add Issue
-              </button>
-              <button onClick={saveNewsletterIssues} disabled={saving} className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-                <Save className="w-4 h-4" /> Save All
-              </button>
+            </div>
+
+            {/* Newsletter Subscribers Section */}
+            <div className="mt-8 pt-8 border-t border-slate-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-slate-700">Newsletter Subscribers</h3>
+                  <p className="text-sm text-slate-500">
+                    {newsletterSubscribers.filter(s => s.is_active).length} active of {newsletterSubscribers.length} total subscribers
+                  </p>
+                </div>
+                <button 
+                  onClick={exportSubscribers}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+                >
+                  <Mail className="w-4 h-4" /> Export CSV
+                </button>
+              </div>
+              
+              {newsletterSubscribers.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+                  <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No subscribers yet</p>
+                  <p className="text-xs mt-1">Subscribers will appear here when people sign up on your website</p>
+                </div>
+              ) : (
+                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Email</th>
+                        <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Subscribed</th>
+                        <th className="text-left px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                        <th className="text-right px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {newsletterSubscribers.map((subscriber) => (
+                        <tr key={subscriber.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-slate-900">{subscriber.email}</div>
+                            {subscriber.name && <div className="text-xs text-slate-500">{subscriber.name}</div>}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-600">
+                            {new Date(subscriber.subscribed_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              subscriber.is_active 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {subscriber.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => subscriber.id && toggleSubscriberStatus(subscriber.id, subscriber.is_active)}
+                                className={`p-1.5 rounded-lg transition-colors ${
+                                  subscriber.is_active 
+                                    ? 'text-orange-600 hover:bg-orange-50' 
+                                    : 'text-green-600 hover:bg-green-50'
+                                }`}
+                                title={subscriber.is_active ? 'Deactivate' : 'Activate'}
+                              >
+                                {subscriber.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </button>
+                              <button
+                                onClick={() => subscriber.id && deleteSubscriber(subscriber.id)}
+                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </SectionWrapper>

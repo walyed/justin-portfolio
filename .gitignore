@@ -1,4 +1,4 @@
-﻿# Logs
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -35,9 +35,8 @@ build
 *.sln
 *.sw?
 *.swp
-*.swo
-
-# OS files
+*.swo# OS files
+.DS_Store
 Thumbs.db
 Desktop.ini
 
