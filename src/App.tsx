@@ -278,7 +278,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl h-[42rem] md:h-[48rem] lg:h-[56rem] mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10 pointer-events-none"
+          className="relative w-full max-w-2xl md:max-w-3xl lg:max-w-4xl h-[50rem] md:h-[60rem] lg:h-[70rem] mb-8 rounded-2xl overflow-hidden shadow-2xl border border-white/10 pointer-events-none"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -322,7 +322,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight mb-12 text-center relative pointer-events-auto cursor-default group/name"
+          className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight mb-12 text-center relative pointer-events-auto cursor-default group/name"
         >
           <span className="relative inline-block transition-all duration-200 group-hover/name:[text-shadow:-4px_0_#00ffff,4px_0_#ff00ff,0_0_30px_rgba(255,255,255,0.5)]">
             {heroData.name}
