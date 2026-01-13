@@ -120,6 +120,11 @@ export interface SectionLayout {
   show_image: boolean;
   image_position: 'top' | 'left' | 'right' | 'background';
   image_size: 'sm' | 'md' | 'lg' | 'full';
+  font_family?: string;
+  font_size?: string;
+  font_color?: string;
+  card_color?: string;
+  card_hover_color?: string;
 }
 
 export interface HeroImage {

@@ -123,8 +123,21 @@ export function usePortfolioData(): PortfolioData {
         // Process layout data
         const layoutsMap: Record<string, SectionLayout> = {};
         if (layoutsRes.data) {
-          layoutsRes.data.forEach((layout: SectionLayout) => {
-            layoutsMap[layout.section_name] = layout;
+          layoutsRes.data.forEach((layout: any) => {
+            layoutsMap[layout.section_name] = {
+              section_name: layout.section_name,
+              layout: layout.layout,
+              card_direction: layout.card_direction,
+              gap: layout.gap,
+              show_image: layout.show_image,
+              image_position: layout.image_position,
+              image_size: layout.image_size,
+              font_family: layout.font_family || 'Inter, system-ui, sans-serif',
+              font_size: layout.font_size || '16px',
+              font_color: layout.font_color || '#1e293b',
+              card_color: layout.card_color || '#ffffff',
+              card_hover_color: layout.card_hover_color || '#f8fafc'
+            };
           });
         }
 

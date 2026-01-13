@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { 
   Award, ChevronRight, ArrowRight, Play,
-  Quote, Trophy, Heart, Globe, Crown, CheckCircle, Loader2
+  Quote, Trophy, Heart, Globe, Crown, CheckCircle, Loader2, Menu, X
 } from 'lucide-react';
 import { usePortfolioData } from './hooks/usePortfolioData';
 import { supabase } from './lib/supabase';
+import Chatbot from './components/Chatbot';
 import type { HeroContent, HeroImage } from './types/portfolio';
 
 // --- COMPONENT: FLOATING MESH BACKGROUND ---
@@ -36,10 +37,173 @@ const FloatingMeshBackground = () => {
   );
 };
 
+// --- COMPONENT: ANIMATED COUNTER FOR STATS ---
+const AnimatedCounter = ({ value, delay = 0, color = 'white' }: { value: string; delay?: number; color?: string }) => {
+  const [displayValue, setDisplayValue] = useState('0');
+  const [phase, setPhase] = useState<'waiting' | 'counting' | 'done'>('waiting');
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '0px' });
+
+  useEffect(() => {
+    if (!isInView || phase !== 'waiting') return;
+
+    // Parse the value to extract number and suffix/prefix
+    const match = value.match(/^([\$]?)([\d.]+)([kKxX+%]*)$/);
+    
+    if (!match) {
+      // If it doesn't match our pattern, just display it
+      const timer = setTimeout(() => {
+        setDisplayValue(value);
+        setPhase('done');
+      }, delay * 1000);
+      return () => clearTimeout(timer);
+    }
+
+    const [, prefix, numStr, suffix] = match;
+    const targetNum = parseFloat(numStr);
+    const isDecimal = numStr.includes('.');
+    const decimalPlaces = isDecimal ? (numStr.split('.')[1]?.length || 0) : 0;
+    
+    // Start counting after delay
+    const startTimer = setTimeout(() => {
+      setPhase('counting');
+      
+      const duration = 1500; // 1.5 seconds - faster!
+      const startTime = Date.now();
+      const startValue = 0;
+
+      const animate = () => {
+        const now = Date.now();
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Aggressive easing - fast start, dramatic slow at end
+        const easeOutExpo = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const currentValue = startValue + (targetNum - startValue) * easeOutExpo;
+
+        if (progress < 1) {
+          const formattedValue = isDecimal 
+            ? currentValue.toFixed(decimalPlaces)
+            : Math.floor(currentValue).toString();
+          setDisplayValue(`${prefix}${formattedValue}${suffix}`);
+          requestAnimationFrame(animate);
+        } else {
+          setDisplayValue(value);
+          setPhase('done');
+        }
+      };
+
+      requestAnimationFrame(animate);
+    }, delay * 1000);
+
+    return () => clearTimeout(startTimer);
+  }, [isInView, value, delay, phase]);
+
+  return (
+    <motion.span 
+      ref={ref} 
+      className="tabular-nums inline-block"
+      initial={{ opacity: 0, scale: 0.5, y: 20 }}
+      animate={phase === 'waiting' ? { opacity: 0, scale: 0.5, y: 20 } : 
+               phase === 'counting' ? { opacity: 1, scale: 1.15, y: 0 } : 
+               { opacity: 1, scale: 1, y: 0 }}
+      transition={{ 
+        duration: phase === 'counting' ? 0.4 : 0.3,
+        ease: phase === 'counting' ? [0.34, 1.56, 0.64, 1] : 'easeOut' // Bouncy spring effect
+      }}
+      style={{
+        textShadow: phase === 'done' ? `0 0 8px currentColor` : 'none',
+      }}
+    >
+      {displayValue}
+    </motion.span>
+  );
+};
+
+// --- COMPONENT: STAT CARD WITH ANIMATIONS ---
+const AnimatedStatCard = ({ 
+  value, 
+  label, 
+  delay, 
+  accentColor 
+}: { 
+  value: string; 
+  label: string; 
+  delay: number;
+  accentColor: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const [showGlow, setShowGlow] = useState(false);
+
+  useEffect(() => {
+    if (isInView) {
+      const timer = setTimeout(() => setShowGlow(true), delay * 1000 + 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isInView, delay]);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+      transition={{ duration: 0.6, delay: delay * 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="relative group"
+    >
+      {/* Glow background effect */}
+      <motion.div
+        className="absolute -inset-4 rounded-2xl opacity-0 blur-xl"
+        style={{ background: `radial-gradient(circle, ${accentColor}40 0%, transparent 70%)` }}
+        animate={showGlow ? { opacity: [0, 0.8, 0.4] } : { opacity: 0 }}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
+      />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        <div className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1">
+          <AnimatedCounter value={value} delay={delay} />
+        </div>
+        <motion.div 
+          className="text-xs uppercase tracking-widest font-semibold"
+          style={{ color: accentColor }}
+          initial={{ opacity: 0, letterSpacing: '0.5em' }}
+          animate={isInView ? { opacity: 1, letterSpacing: '0.1em' } : { opacity: 0, letterSpacing: '0.5em' }}
+          transition={{ duration: 0.8, delay: delay + 0.3 }}
+        >
+          {label}
+        </motion.div>
+      </div>
+      
+      {/* Decorative line */}
+      <motion.div
+        className="absolute -bottom-2 left-1/2 h-0.5 rounded-full"
+        style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
+        initial={{ width: 0, x: '-50%' }}
+        animate={isInView ? { width: '80%', x: '-50%' } : { width: 0, x: '-50%' }}
+        transition={{ duration: 0.8, delay: delay + 0.5, ease: 'easeOut' }}
+      />
+    </motion.div>
+  );
+};
+
 // --- PART 1: HERO SECTION (PARTICLE BACKGROUND + IMAGE SLIDESHOW) ---
-const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroImages: HeroImage[] }) => {
+interface HeroFontSettings {
+  fontFamily?: string;
+  fontSize?: string;
+  fontColor?: string;
+}
+
+const HeroSlideshow = ({ heroData, heroImages, fontSettings }: { heroData: HeroContent; heroImages: HeroImage[]; fontSettings?: HeroFontSettings }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Font settings with defaults
+  const heroFontStyles = {
+    fontFamily: fontSettings?.fontFamily || 'Inter, system-ui, sans-serif',
+    fontSize: fontSettings?.fontSize || '16px',
+    color: fontSettings?.fontColor || '#ffffff',
+  };
   
   // Default images if none provided
   const defaultImages: HeroImage[] = [
@@ -250,7 +414,7 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
   const brightness = currentImage?.brightness || 80;
 
   return (
-    <div className="relative w-full h-[85vh] lg:h-screen overflow-hidden border-b border-white/5 bg-[#000205]">
+    <div className="relative w-full h-[85vh] lg:h-screen overflow-hidden border-b border-white/5 bg-[#000205]" style={heroFontStyles}>
       {/* Particle Neural Network Background */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-auto" />
       <div className="absolute top-[65%] left-0 w-full h-[150px] bg-violet-600/10 blur-[80px] pointer-events-none" />
@@ -330,315 +494,33 @@ const HeroSlideshow = ({ heroData, heroImages }: { heroData: HeroContent; heroIm
         </motion.h1>
 
         {/* Stats Row - Bottom */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 text-center pointer-events-none"
-        >
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_1_value}</div>
-            <div className="text-xs text-yellow-500 uppercase tracking-wider mt-1">{heroData.stat_1_label}</div>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_2_value}</div>
-            <div className="text-xs text-yellow-500 uppercase tracking-wider mt-1">{heroData.stat_2_label}</div>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_3_value}</div>
-            <div className="text-xs text-violet-400 uppercase tracking-wider mt-1">{heroData.stat_3_label}</div>
-          </div>
-          <div>
-            <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_4_value}</div>
-            <div className="text-xs text-violet-400 uppercase tracking-wider mt-1">{heroData.stat_4_label}</div>
-          </div>
-        </motion.div>
-      </div>
-    </div>
-  );
-};
-
-// Keep the old particle code for reference but not used
-const _ParticleHeroOld = ({ heroData }: { heroData: HeroContent }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    let animationFrameId: number;
-    let particles: Particle[] = [];
-    
-    // EXTREMELY DENSE neural net config
-    const particleCount = 350; 
-    const connectionDistance = 100;
-    const mouseDistance = 250;
-    const gridSpeed = 0.4;
-    let gridOffset = 0;
-    let autoTiltAngle = 0;
-
-    const mouse = { x: null as number | null, y: null as number | null };
-
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight; 
-      initParticles();
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - rect.left;
-        mouse.y = e.clientY - rect.top;
-    };
-
-    const handleMouseLeave = () => {
-      mouse.x = null;
-      mouse.y = null;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-        if(e.touches && e.touches.length > 0) {
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = e.touches[0].clientX - rect.left;
-            mouse.y = e.touches[0].clientY - rect.top;
-        }
-    };
-
-    class Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      baseColor: string;
-
-      constructor() {
-        this.x = Math.random() * canvas!.width;
-        this.y = Math.random() * (canvas!.height * 0.75);
-        this.vx = (Math.random() - 0.5) * 0.3;
-        this.vy = (Math.random() - 0.5) * 0.3;
-        this.size = Math.random() * 1.5 + 0.5;
-        this.baseColor = Math.random() > 0.5 ? '139, 92, 246' : '99, 102, 241';
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        if (this.x < 0 || this.x > canvas!.width) this.vx = -this.vx;
-        if (this.y < 0 || this.y > canvas!.height * 0.8) this.vy = -this.vy; 
-
-        if (mouse.x != null && mouse.y != null) {
-          const dx = mouse.x - this.x;
-          const dy = mouse.y - this.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < mouseDistance) {
-             const forceDirectionX = dx / distance;
-             const forceDirectionY = dy / distance;
-             const force = (mouseDistance - distance) / mouseDistance;
-             // Powerful swirl/move effect
-             this.x -= forceDirectionX * force * 4;
-             this.y -= forceDirectionY * force * 4;
-          }
-        }
-      }
-
-      draw() {
-        ctx!.fillStyle = `rgba(${this.baseColor}, 0.7)`; 
-        ctx!.beginPath();
-        ctx!.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx!.fill();
-      }
-    }
-
-    function initParticles() {
-      particles = [];
-      for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-    }
-
-    function drawLandscape() {
-        const horizonY = canvas!.height * 0.65;
-        const centerX = canvas!.width / 2;
-        let tiltX = 0;
-        if (mouse.x !== null) {
-            tiltX = (mouse.x - centerX) * 0.03; 
-        } else {
-            autoTiltAngle += 0.008;
-            tiltX = Math.sin(autoTiltAngle) * (canvas!.width * 0.04);
-        }
-
-        const gradient = ctx!.createLinearGradient(0, horizonY - 100, 0, horizonY + 200);
-        gradient.addColorStop(0, "rgba(0,0,0,0)");
-        gradient.addColorStop(0.5, "rgba(139, 92, 246, 0.15)");
-        gradient.addColorStop(1, "rgba(0,0,0,0)");
-        ctx!.fillStyle = gradient;
-        ctx!.fillRect(0, horizonY - 100, canvas!.width, 300);
-
-        ctx!.save();
-        ctx!.beginPath();
-        ctx!.rect(0, horizonY, canvas!.width, canvas!.height - horizonY);
-        ctx!.clip();
-
-        ctx!.strokeStyle = "rgba(139, 92, 246, 0.12)";
-        ctx!.lineWidth = 1;
-        const spacing = canvas!.width * 1.5 / 20;
-        for(let i = -10; i <= 30; i++) {
-            const xBase = (i * spacing) - tiltX;
-            ctx!.beginPath();
-            ctx!.moveTo(centerX + (xBase - centerX) * 0.1, horizonY);
-            ctx!.lineTo(xBase + (xBase - centerX) * 4, canvas!.height);
-            ctx!.stroke();
-        }
-
-        gridOffset = (gridOffset + gridSpeed) % 40;
-        for(let i = 0; i < 20; i++) {
-            const z = i * 40 + gridOffset;
-            const yPos = horizonY + (Math.pow(z / 800, 2) * (canvas!.height - horizonY));
-            if (yPos < canvas!.height && yPos > horizonY) {
-                const opacity = Math.min(1, (yPos - horizonY) / 200);
-                ctx!.strokeStyle = `rgba(139, 92, 246, ${opacity * 0.2})`;
-                ctx!.beginPath();
-                ctx!.moveTo(0, yPos);
-                ctx!.lineTo(canvas!.width, yPos);
-                ctx!.stroke();
-            }
-        }
-        ctx!.restore();
-    }
-
-    function animate() {
-      ctx!.fillStyle = '#000205'; 
-      ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
-      
-      // Draw Dense Connections
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-        for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < connectionDistance) {
-                ctx!.beginPath();
-                const opacity = 1 - (distance / connectionDistance);
-                ctx!.strokeStyle = `rgba(139, 92, 246, ${opacity * 0.35})`; 
-                ctx!.lineWidth = 0.5;
-                ctx!.moveTo(particles[i].x, particles[i].y);
-                ctx!.lineTo(particles[j].x, particles[j].y);
-                ctx!.stroke();
-            }
-        }
-      }
-      drawLandscape();
-      animationFrameId = requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('resize', handleResize);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
-    handleResize();
-    animate();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
-  return (
-    <div className="relative w-full h-[85vh] lg:h-screen overflow-hidden border-b border-white/5 bg-[#000205]">
-        <canvas ref={canvasRef} className="absolute inset-0 z-0" />
-        <div className="absolute top-[65%] left-0 w-full h-[150px] bg-violet-600/10 blur-[80px] pointer-events-none" />
-        
-        {/* Hero Content */}
-        <div className="relative z-10 h-full w-full flex flex-col items-center justify-center px-4 pointer-events-none">
-            {/* Top Badge */}
-            <motion.div 
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-600/80 to-amber-600/80 rounded-full mb-4"
-            >
-                <Trophy className="w-4 h-4 text-yellow-200" />
-                <span className="text-yellow-100 text-sm font-bold tracking-wider">{heroData.badge_text}</span>
-            </motion.div>
-
-            {/* Subtitle */}
-            <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-slate-400 text-sm tracking-[0.2em] uppercase mb-6"
-            >
-                {heroData.subtitle}
-            </motion.p>
-
-            {/* Main Name with Hover Glitch Effect */}
-            <motion.h1 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tight mb-6 text-center relative pointer-events-auto cursor-default group/name"
-            >
-                <span className="relative inline-block transition-all duration-200 group-hover/name:[text-shadow:-4px_0_#00ffff,4px_0_#ff00ff,0_0_30px_rgba(255,255,255,0.5)]">
-                    {heroData.name}
-                </span>
-            </motion.h1>
-
-            {/* Tagline */}
-            <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                className="text-xl md:text-2xl lg:text-3xl text-slate-300 tracking-wide mb-10 text-center"
-            >
-                {heroData.tagline} <span className="text-yellow-400 font-medium">{heroData.tagline_highlight}</span>
-            </motion.p>
-
-            {/* CTA Buttons */}
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                className="flex flex-wrap gap-4 justify-center mb-16 pointer-events-auto"
-            >
-                <a href="#about" className="flex items-center gap-2 px-8 py-4 bg-white text-slate-900 rounded-lg font-bold hover:bg-slate-100 transition-all shadow-lg">
-                    Start Journey <ArrowDown className="w-4 h-4" />
-                </a>
-                <a href="mailto:contact@joela.tech" className="flex items-center gap-2 px-8 py-4 bg-slate-800 text-white rounded-lg font-bold hover:bg-slate-700 transition-all border border-slate-600">
-                    Contact Me
-                </a>
-            </motion.div>
-
-            {/* Stats Row */}
-                <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 text-center"
-            >
-                <div>
-                    <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_1_value}</div>
-                    <div className="text-xs text-yellow-500 uppercase tracking-wider mt-1">{heroData.stat_1_label}</div>
-                </div>
-                <div>
-                    <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_2_value}</div>
-                    <div className="text-xs text-yellow-500 uppercase tracking-wider mt-1">{heroData.stat_2_label}</div>
-                </div>
-                <div>
-                    <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_3_value}</div>
-                    <div className="text-xs text-violet-400 uppercase tracking-wider mt-1">{heroData.stat_3_label}</div>
-                </div>
-                <div>
-                    <div className="text-3xl md:text-4xl font-bold text-white">{heroData.stat_4_value}</div>
-                    <div className="text-xs text-violet-400 uppercase tracking-wider mt-1">{heroData.stat_4_label}</div>
-                   </div>
-                </motion.div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 lg:gap-20 text-center w-full max-w-5xl pointer-events-none">
+          <AnimatedStatCard 
+            value={heroData.stat_1_value} 
+            label={heroData.stat_1_label} 
+            delay={0.2}
+            accentColor="#eab308"
+          />
+          <AnimatedStatCard 
+            value={heroData.stat_2_value} 
+            label={heroData.stat_2_label} 
+            delay={0.4}
+            accentColor="#eab308"
+          />
+          <AnimatedStatCard 
+            value={heroData.stat_3_value} 
+            label={heroData.stat_3_label} 
+            delay={0.6}
+            accentColor="#a78bfa"
+          />
+          <AnimatedStatCard 
+            value={heroData.stat_4_value} 
+            label={heroData.stat_4_label} 
+            delay={0.8}
+            accentColor="#a78bfa"
+          />
         </div>
+      </div>
     </div>
   );
 };
@@ -658,8 +540,71 @@ const menuItems = [
     { id: 'newsletter', label: '09. Newsletter', activeClass: 'shadow-[inset_4px_0_0_0_#6366f1] bg-indigo-500/10 text-indigo-700 font-bold', hoverClass: 'text-slate-500 hover:bg-indigo-500/10 hover:text-indigo-700 hover:shadow-[inset_4px_0_0_0_#6366f1]' },
 ];
 
-const Sidebar = ({ activeSection }: { activeSection: string }) => (
-    <aside className="hidden lg:block lg:col-span-3">
+const Sidebar = ({ activeSection }: { activeSection: string }) => {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    
+    return (
+    <>
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+        <div className="font-black text-2xl tracking-tighter text-black">JA.</div>
+        <button 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+      
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="lg:hidden fixed inset-0 z-40 bg-black/50"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+      
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'tween', duration: 0.3 }}
+            className="lg:hidden fixed top-0 left-0 bottom-0 z-50 w-72 bg-white shadow-2xl overflow-y-auto"
+          >
+            <div className="p-6">
+              <div className="font-black text-3xl tracking-tighter text-black mb-6">JA.</div>
+              <nav className="flex flex-col gap-1">
+                {menuItems.map((item) => (
+                  <a 
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-4 py-3 text-sm transition-all duration-200 rounded-lg ${
+                      activeSection === item.id 
+                        ? item.activeClass
+                        : item.hoverClass
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:block lg:col-span-3">
         <div className="sticky top-8 space-y-2 ml-2">
             <div className="font-black text-3xl tracking-tighter text-black mb-2 ml-2">JA.</div>
             <nav className="flex flex-col gap-1">
@@ -678,8 +623,10 @@ const Sidebar = ({ activeSection }: { activeSection: string }) => (
                 ))}
             </nav>
         </div>
-    </aside>
-);
+      </aside>
+    </>
+    );
+};
 
 // --- PART 3: HOLO CARD (WITH RADIOGRAPHY SCANLINE) ---
 interface Project {
@@ -755,7 +702,19 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [error, setError] = useState('');
+  const [currentCardHovered, setCurrentCardHovered] = useState(false);
+  const [subscribeCardHovered, setSubscribeCardHovered] = useState(false);
+  const [pastCardHovered, setPastCardHovered] = useState(false);
 
+  // Get card styles for newsletter section
+  const getCardStyles = () => {
+    const layout = portfolioData.sectionLayouts?.newsletter;
+    return {
+      cardColor: layout?.card_color || '#ffffff',
+      cardHoverColor: layout?.card_hover_color || '#f8fafc'
+    };
+  };
+  const cardStyles = getCardStyles();
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
@@ -806,7 +765,12 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
       {/* Left Column: Current + Newsletter Stacked */}
       <div className="flex-1 space-y-6 max-w-sm">
         {/* Current Card - Top */}
-        <div className="w-full bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+        <div 
+          className="w-full rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]"
+          style={{ backgroundColor: currentCardHovered ? cardStyles.cardHoverColor : cardStyles.cardColor }}
+          onMouseEnter={() => setCurrentCardHovered(true)}
+          onMouseLeave={() => setCurrentCardHovered(false)}
+        >
           <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Current</h4>
           {currentIssue ? (
             <a href={currentIssue.link || '#'} className="block group">
@@ -819,7 +783,12 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
         </div>
 
         {/* Newsletter Subscribe Card - Below Current (Smaller) */}
-        <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]">
+        <div 
+          className="w-full rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]"
+          style={{ backgroundColor: subscribeCardHovered ? cardStyles.cardHoverColor : cardStyles.cardColor }}
+          onMouseEnter={() => setSubscribeCardHovered(true)}
+          onMouseLeave={() => setSubscribeCardHovered(false)}
+        >
           <div className="p-6 space-y-4">
             {/* Title */}
             <h3 className="text-lg font-bold text-slate-900">Newsletter</h3>
@@ -880,7 +849,12 @@ const NewsletterForm = ({ portfolioData }: { portfolioData: any }) => {
 
       {/* Past Issues Card - Right */}
       <div className="flex-1 max-w-sm">
-        <div className="bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+        <div 
+          className="rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]"
+          style={{ backgroundColor: pastCardHovered ? cardStyles.cardHoverColor : cardStyles.cardColor }}
+          onMouseEnter={() => setPastCardHovered(true)}
+          onMouseLeave={() => setPastCardHovered(false)}
+        >
           <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Issues</h4>
           {pastIssues.length > 0 ? (
             <div className="space-y-5">
@@ -954,7 +928,69 @@ const App = () => {
     );
   };
 
-  const Section = ({ id, title, chapter, children, color = 'violet', borderColor = 'border-violet-500' }: { id: string; title: string; chapter: string; children: React.ReactNode; color?: string; borderColor?: string }) => {
+  // Helper to get font styles from section layout
+  const getSectionFontStyles = (sectionName: string) => {
+    const layout = portfolioData.sectionLayouts[sectionName];
+    return {
+      fontFamily: layout?.font_family || 'Inter, system-ui, sans-serif',
+      fontSize: layout?.font_size || '16px',
+      color: layout?.font_color || '#1e293b'
+    };
+  };
+
+  // Helper to get card styles (background color and hover color) from section layout
+  const getSectionCardStyles = (sectionName: string) => {
+    const layout = portfolioData.sectionLayouts[sectionName];
+    return {
+      cardColor: layout?.card_color || '#ffffff',
+      cardHoverColor: layout?.card_hover_color || '#f8fafc'
+    };
+  };
+
+  // StyledCard component that applies dynamic card colors with hover effect
+  const StyledCard = ({ 
+    sectionName, 
+    children, 
+    className = '', 
+    as: Component = 'div',
+    ...props 
+  }: { 
+    sectionName: string; 
+    children: React.ReactNode; 
+    className?: string;
+    as?: 'div' | 'a';
+    [key: string]: any;
+  }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const { cardColor, cardHoverColor } = getSectionCardStyles(sectionName);
+    
+    // Determine if the card color is dark to adjust text color
+    const isDarkColor = (color: string) => {
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance < 0.5;
+    };
+    
+    const currentColor = isHovered ? cardHoverColor : cardColor;
+    const textColorClass = isDarkColor(currentColor) ? 'text-white' : '';
+    
+    return (
+      <Component
+        className={`${className} ${textColorClass}`}
+        style={{ backgroundColor: currentColor, transition: 'background-color 0.3s ease' }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        {...props}
+      >
+        {children}
+      </Component>
+    );
+  };
+
+  const Section = ({ id, title, chapter, children, color = 'violet', borderColor = 'border-violet-500', sectionName }: { id: string; title: string; chapter: string; children: React.ReactNode; color?: string; borderColor?: string; sectionName?: string }) => {
     const ref = useRef<HTMLElement>(null);
     const isInView = useInView(ref, { margin: "-40% 0px -40% 0px" });
     useEffect(() => { if (isInView) setActiveSection(id); }, [isInView, id]);
@@ -971,11 +1007,15 @@ const App = () => {
       indigo: 'text-indigo-600',
     };
     
+    // Get font styles if sectionName is provided
+    const fontStyles = sectionName ? getSectionFontStyles(sectionName) : {};
+    const titleColor = fontStyles.color || '#000000';
+    
     return (
-        <section id={id} ref={ref} className="scroll-mt-24 pb-16">
+        <section id={id} ref={ref} className="scroll-mt-24 pb-16" style={fontStyles}>
             <div className={`mb-8 border-l-4 ${borderColor} pl-6`}>
                 <span className={`${colorTextMap[color] || 'text-violet-600'} font-bold tracking-widest uppercase text-sm mb-1 block`}>{chapter}</span>
-                <h2 className="text-4xl font-black text-black mb-2 tracking-tight">{title}</h2>
+                <h2 className="text-4xl font-black mb-2 tracking-tight" style={{ color: titleColor }}>{title}</h2>
             </div>
             {children}
         </section>
@@ -996,14 +1036,8 @@ const App = () => {
         }
       `}</style>
 
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed w-full z-50 top-0 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center justify-between shadow-sm">
-        <div className="font-bold text-xl tracking-tight text-black">JA.</div>
-        <a href="mailto:contact@joela.tech" className="px-4 py-2 rounded-full bg-slate-900 text-white text-sm font-medium">Contact</a>
-      </div>
-
-      <main className="w-full">
-        <section id="home"><HeroSlideshow heroData={portfolioData.hero!} heroImages={portfolioData.heroImages} /></section>
+      <main className="w-full pt-14 lg:pt-0">
+        <section id="home"><HeroSlideshow heroData={portfolioData.hero!} heroImages={portfolioData.heroImages} fontSettings={getSectionFontStyles('hero')} /></section>
         
         {/* White Content Area Below Hero */}
         <div className="w-full bg-[#ffffff] text-slate-800 relative">
@@ -1013,8 +1047,20 @@ const App = () => {
                 <div className="lg:col-span-9 pt-20 lg:pt-6">
                     
                     {/* ABOUT SECTION */}
-                    <Section id="about" title="About Me" chapter="Chapter 01" color="slate" borderColor="border-slate-400">
-                        <div className="relative bg-slate-50/50 border border-slate-200 p-10 rounded-3xl overflow-hidden shadow-lg">
+                    <Section id="about" title="About Me" chapter="Chapter 01" color="slate" borderColor="border-slate-400" sectionName="about">
+                        {(() => {
+                          const cardStyles = getSectionCardStyles('about');
+                          return (
+                        <div 
+                          className="relative border border-slate-200 p-10 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                          style={{ backgroundColor: cardStyles.cardColor }}
+                          onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                            e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                          }}
+                          onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                            e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                          }}
+                        >
                             <ColoredBlob color="slate" />
                             <div className="relative z-10 grid md:grid-cols-5 gap-6 items-start">
                                 <div className="md:col-span-3 space-y-8">
@@ -1031,10 +1077,12 @@ const App = () => {
                                 </div>
                             </div>
                         </div>
+                          );
+                        })()}
                     </Section>
 
                     {/* EXPERIENCE / LEADERSHIP SECTION */}
-                    <Section id="leadership" title="Experience / Leadership" chapter="Chapter 02" color="violet" borderColor="border-violet-500">
+                    <Section id="leadership" title="Experience / Leadership" chapter="Chapter 02" color="violet" borderColor="border-violet-500" sectionName="leadership">
                         {(() => {
                             const layout = portfolioData.sectionLayouts['leadership'];
                             const isHorizontal = layout?.card_direction === 'horizontal';
@@ -1047,10 +1095,25 @@ const App = () => {
                                         { id: 4, title: "CAYAC", date: "Advisor", role: "Board Advisor", organization: "HEALTHCARE ADVOCACY", icon: "Heart", color: "pink" }
                                     ]).map((item) => {
                                         const IconComponent = item.icon === 'Crown' ? Crown : item.icon === 'Globe' ? Globe : item.icon === 'Award' ? Award : Heart;
+                                        const cardStyles = getSectionCardStyles('leadership');
                                         const CardWrapper = item.link ? 'a' : 'div';
                                         const cardProps = item.link ? { href: item.link, target: '_blank', rel: 'noopener noreferrer' } : {};
                                         return (
-                                        <CardWrapper key={item.id} {...cardProps} className={`relative bg-white shadow-lg p-6 rounded-xl border border-violet-100 hover:shadow-xl hover:-translate-y-1 hover:border-violet-300 transition-all duration-300 group overflow-hidden ${isHorizontal ? 'flex items-center gap-4' : ''} ${item.link ? 'cursor-pointer' : ''}`}>
+                                        <CardWrapper 
+                                            key={item.id} 
+                                            {...cardProps} 
+                                            className={`relative shadow-lg p-6 rounded-xl border border-violet-100 hover:shadow-xl hover:-translate-y-1 hover:border-violet-300 transition-all duration-300 group overflow-hidden ${isHorizontal ? 'flex items-center gap-4' : ''} ${item.link ? 'cursor-pointer' : ''}`}
+                                            style={{ 
+                                                backgroundColor: cardStyles.cardColor,
+                                                ['--hover-bg' as any]: cardStyles.cardHoverColor
+                                            }}
+                                            onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                            }}
+                                            onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                            }}
+                                        >
                                             <ColoredBlob color={item.color} />
                                             <div className="flex-1 relative z-10">
                                                 <div className="flex items-center justify-between mb-2">
@@ -1069,7 +1132,7 @@ const App = () => {
                     </Section>
 
                     {/* PORTFOLIO PROJECTS SECTION */}
-                    <Section id="projects" title="Portfolio Projects" chapter="Chapter 03" color="blue" borderColor="border-blue-500">
+                    <Section id="projects" title="Portfolio Projects" chapter="Chapter 03" color="blue" borderColor="border-blue-500" sectionName="projects">
                         {(() => {
                             const layout = portfolioData.sectionLayouts['projects'];
                             const isHorizontal = layout?.card_direction === 'horizontal';
@@ -1085,6 +1148,7 @@ const App = () => {
                                     {projects.map((p) => {
                                         const CardWrapper = p.link ? 'a' : 'div';
                                         const cardProps = p.link ? { href: p.link, target: '_blank', rel: 'noopener noreferrer' } : {};
+                                        const cardStyles = getSectionCardStyles('projects');
                                         
                                         // Determine flex direction based on layout settings
                                         const flexDirection = isHorizontal 
@@ -1095,7 +1159,14 @@ const App = () => {
                                             <CardWrapper 
                                                 key={p.id} 
                                                 {...cardProps}
-                                                className={`relative w-full rounded-xl bg-white shadow-xl border border-slate-200 group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 hover:border-blue-300 flex ${flexDirection} h-full ${p.link ? 'cursor-pointer' : ''}`}
+                                                className={`relative w-full rounded-xl shadow-xl border border-slate-200 group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 hover:border-blue-300 flex ${flexDirection} h-full ${p.link ? 'cursor-pointer' : ''}`}
+                                                style={{ backgroundColor: cardStyles.cardColor }}
+                                                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                                }}
+                                                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                                }}
                                             >
                                                 {showImage && p.image && (
                                                     <div className={`relative ${isHorizontal ? imageSizeClass : 'w-full'} ${isHorizontal ? 'h-auto min-h-[200px]' : 'h-64'} overflow-hidden flex-shrink-0`}>
@@ -1132,7 +1203,7 @@ const App = () => {
                     </Section>
 
                     {/* AWARDS & RECOGNITION SECTION */}
-                    <Section id="awards" title="Awards & Recognition" chapter="Chapter 04" color="yellow" borderColor="border-yellow-500">
+                    <Section id="awards" title="Awards & Recognition" chapter="Chapter 04" color="yellow" borderColor="border-yellow-500" sectionName="awards">
                         {(() => {
                             const layout = portfolioData.sectionLayouts['awards'];
                             const isHorizontal = layout?.card_direction === 'horizontal';
@@ -1142,8 +1213,20 @@ const App = () => {
                                     {(portfolioData.awards.length > 0 ? portfolioData.awards.filter(a => a.is_featured) : [{ id: 1, title: "Samsung Solve for Tomorrow", description: "National 2nd Place ($10k) + Fan Favourite ($5k)", is_featured: true }]).map(award => {
                                         const CardWrapper = award.link ? 'a' : 'div';
                                         const cardProps = award.link ? { href: award.link, target: '_blank', rel: 'noopener noreferrer' } : {};
+                                        const cardStyles = getSectionCardStyles('awards');
                                         return (
-                                        <CardWrapper key={award.id} {...cardProps} className={`relative p-6 bg-white shadow-lg border border-yellow-200 rounded-xl overflow-hidden group hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 transition-all duration-300 ${isHorizontal ? 'flex items-center gap-4' : ''} ${award.link ? 'cursor-pointer' : ''}`}>
+                                        <CardWrapper 
+                                            key={award.id} 
+                                            {...cardProps} 
+                                            className={`relative p-6 shadow-lg border border-yellow-200 rounded-xl overflow-hidden group hover:shadow-xl hover:-translate-y-1 hover:border-yellow-400 transition-all duration-300 ${isHorizontal ? 'flex items-center gap-4' : ''} ${award.link ? 'cursor-pointer' : ''}`}
+                                            style={{ backgroundColor: cardStyles.cardColor }}
+                                            onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                            }}
+                                            onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                            }}
+                                        >
                                             <ColoredBlob color="yellow" />
                                             <Trophy className="w-8 h-8 text-yellow-500 relative z-10 flex-shrink-0" />
                                             <div className="relative z-10 flex-1">
@@ -1160,8 +1243,20 @@ const App = () => {
                                     ]).map(award => {
                                         const CardWrapper = award.link ? 'a' : 'div';
                                         const cardProps = award.link ? { href: award.link, target: '_blank', rel: 'noopener noreferrer' } : {};
+                                        const cardStyles = getSectionCardStyles('awards');
                                         return (
-                                        <CardWrapper key={award.id} {...cardProps} className={`p-6 bg-white shadow-md border border-yellow-100 rounded-xl hover:shadow-lg hover:-translate-y-1 hover:border-yellow-300 transition-all duration-300 group relative overflow-hidden ${isHorizontal ? 'flex items-center gap-4' : ''} ${award.link ? 'cursor-pointer' : ''}`}>
+                                        <CardWrapper 
+                                            key={award.id} 
+                                            {...cardProps} 
+                                            className={`p-6 shadow-md border border-yellow-100 rounded-xl hover:shadow-lg hover:-translate-y-1 hover:border-yellow-300 transition-all duration-300 group relative overflow-hidden ${isHorizontal ? 'flex items-center gap-4' : ''} ${award.link ? 'cursor-pointer' : ''}`}
+                                            style={{ backgroundColor: cardStyles.cardColor }}
+                                            onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                            }}
+                                            onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                            }}
+                                        >
                                             <ColoredBlob color="yellow" />
                                             <div className="relative z-10 flex-1">
                                                 <h3 className="font-bold text-slate-900 mb-1">{award.title}</h3>
@@ -1202,8 +1297,11 @@ const App = () => {
                     </Section>
 
                     {/* COMMUNITY & SERVICE SECTION */}
-                    <Section id="community" title="Community & Service" chapter="Chapter 05" color="emerald" borderColor="border-emerald-500">
+                    <Section id="community" title="Community & Service" chapter="Chapter 05" color="emerald" borderColor="border-emerald-500" sectionName="community">
                         {(() => {
+                          // Get card styles for community section
+                          const cardStyles = getSectionCardStyles('community');
+                          
                           // Get current/upcoming event (first event)
                           const upcomingEvent = portfolioData.communityEvents && portfolioData.communityEvents.length > 0 
                             ? portfolioData.communityEvents[0] 
@@ -1220,7 +1318,16 @@ const App = () => {
                               {/* Left Column: Upcoming + Donate Stacked */}
                               <div className="flex-1 space-y-6 max-w-sm">
                                 {/* Upcoming Card - Top */}
-                                <div className="w-full bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+                                <div 
+                                  className="w-full rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]"
+                                  style={{ backgroundColor: cardStyles.cardColor }}
+                                  onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                    e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                  }}
+                                  onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                    e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                  }}
+                                >
                                   <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Upcoming</h4>
                                   {upcomingEvent ? (
                                     <a href={upcomingEvent.link || '#'} className="block group">
@@ -1236,7 +1343,16 @@ const App = () => {
                                 </div>
 
                                 {/* Donate Card - Below Upcoming */}
-                                <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]">
+                                <div 
+                                  className="w-full rounded-2xl border border-slate-200 shadow-lg overflow-hidden min-h-[280px]"
+                                  style={{ backgroundColor: cardStyles.cardColor }}
+                                  onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                    e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                  }}
+                                  onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                    e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                  }}
+                                >
                                   <div className="p-6 space-y-4">
                                     {/* Title */}
                                     <h3 className="text-lg font-bold text-slate-900">{portfolioData.community?.title || 'Silver AI Initiative'}</h3>
@@ -1257,7 +1373,16 @@ const App = () => {
 
                               {/* Past Events Card - Right */}
                               <div className="flex-1 max-w-sm">
-                                <div className="bg-white rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]">
+                                <div 
+                                  className="rounded-lg border border-slate-200 hover:shadow-lg transition-all duration-300 p-8 min-h-[180px]"
+                                  style={{ backgroundColor: cardStyles.cardColor }}
+                                  onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                    e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                  }}
+                                  onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                    e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                  }}
+                                >
                                   <h4 className="text-base font-bold text-slate-900 uppercase tracking-wide mb-6">Past Events</h4>
                                   {pastEvents.length > 0 ? (
                                     <div className="space-y-5">
@@ -1279,17 +1404,29 @@ const App = () => {
                     </Section>
 
                     {/* MEDIA & PRESS SECTION */}
-                    <Section id="press" title="Media & Press" chapter="Chapter 06" color="red" borderColor="border-red-500">
+                    <Section id="press" title="Media & Press" chapter="Chapter 06" color="red" borderColor="border-red-500" sectionName="press">
                         {(() => {
                             const layout = portfolioData.sectionLayouts['press'];
                             const isHorizontal = layout?.card_direction === 'horizontal';
                             return (
                                 <div className={`${getLayoutClass(layout?.layout)} ${getGapClass(layout?.gap)}`}>
                                     {/* Featured Press Items */}
-                                    {(portfolioData.press.length > 0 ? portfolioData.press.filter(p => p.is_featured) : [
-                                        { id: 1, title: "Top 20 Under 20: Class of 2026", description: "Awarded by Avenue Magazine & Calgary YMCA. Recognized for leadership and innovation.", source: "Headline Honour", is_featured: true, is_video: false, link: "#", color: "red" }
-                                    ]).map(item => (
-                                        <div key={item.id} className={`relative bg-red-50 border border-red-100 p-8 rounded-2xl group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${layout?.layout !== 'list' ? 'col-span-full' : ''} ${isHorizontal ? 'flex items-start gap-4' : ''}`}>
+                                    {(() => {
+                                        const cardStyles = getSectionCardStyles('press');
+                                        return (portfolioData.press.length > 0 ? portfolioData.press.filter(p => p.is_featured) : [
+                                            { id: 1, title: "Top 20 Under 20: Class of 2026", description: "Awarded by Avenue Magazine & Calgary YMCA. Recognized for leadership and innovation.", source: "Headline Honour", is_featured: true, is_video: false, link: "#", color: "red" }
+                                        ]).map(item => (
+                                            <div 
+                                                key={item.id} 
+                                                className={`relative border border-red-100 p-8 rounded-2xl group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${layout?.layout !== 'list' ? 'col-span-full' : ''} ${isHorizontal ? 'flex items-start gap-4' : ''}`}
+                                                style={{ backgroundColor: cardStyles.cardColor }}
+                                                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                                }}
+                                                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                                }}
+                                            >
                                             <div className={`relative z-10 ${isHorizontal ? 'flex-1' : ''}`}>
                                                 <div className="flex items-center gap-2 mb-4">
                                                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -1304,21 +1441,35 @@ const App = () => {
                                                 )}
                                             </div>
                                         </div>
-                                    ))}
+                                    ));
+                                    })()}
 
                                     {/* Regular Press Items */}
-                                    {(portfolioData.press.length > 0 ? portfolioData.press.filter(p => !p.is_featured && !p.is_video) : [
-                                        { id: 2, title: "Calgary Team Regional Finalist", description: "Featured coverage of the HEROChair project.", source: "CTV NEWS", color: "red" },
-                                        { id: 3, title: "Winners Announcement", description: "2nd Place National & Fan Favourite Award.", source: "SAMSUNG", color: "blue" }
-                                    ]).map(item => (
-                                        <div key={item.id} className={`relative bg-white border border-slate-200 p-6 rounded-2xl group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${isHorizontal ? 'flex items-center gap-4' : ''}`}>
+                                    {(() => {
+                                        const cardStyles = getSectionCardStyles('press');
+                                        return (portfolioData.press.length > 0 ? portfolioData.press.filter(p => !p.is_featured && !p.is_video) : [
+                                            { id: 2, title: "Calgary Team Regional Finalist", description: "Featured coverage of the HEROChair project.", source: "CTV NEWS", color: "red" },
+                                            { id: 3, title: "Winners Announcement", description: "2nd Place National & Fan Favourite Award.", source: "SAMSUNG", color: "blue" }
+                                        ]).map(item => (
+                                            <div 
+                                                key={item.id} 
+                                                className={`relative border border-slate-200 p-6 rounded-2xl group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${isHorizontal ? 'flex items-center gap-4' : ''}`}
+                                                style={{ backgroundColor: cardStyles.cardColor }}
+                                                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                                }}
+                                                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                                }}
+                                            >
                                             <div className={`relative z-10 ${isHorizontal ? 'flex-1' : ''}`}>
                                                 <div className={`text-${item.color}-600 text-lg font-bold uppercase tracking-wide mb-3`}>{item.source}</div>
                                                 <h4 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h4>
                                                 <p className="text-slate-600">{item.description}</p>
                                             </div>
                                         </div>
-                                    ))}
+                                    ));
+                                    })()}
 
                                     {/* Video Items */}
                                     {(portfolioData.press.length > 0 ? portfolioData.press.filter(p => p.is_video) : [
@@ -1343,16 +1494,31 @@ const App = () => {
                     </Section>
 
                     {/* PUBLICATIONS SECTION */}
-                    <Section id="publications" title="Publications" chapter="Chapter 07" color="cyan" borderColor="border-cyan-500">
+                    <Section id="publications" title="Publications" chapter="Chapter 07" color="cyan" borderColor="border-cyan-500" sectionName="publications">
                         {(() => {
                             const layout = portfolioData.sectionLayouts['publications'];
                             const isHorizontal = layout?.card_direction === 'horizontal';
                             return (
                                 <div className={`${getLayoutClass(layout?.layout)} ${getGapClass(layout?.gap)}`}>
-                                    {(portfolioData.publications.length > 0 ? portfolioData.publications : [
-                                        { id: 1, title: "Scintix: AI-Driven Radiotherapy at Stanford", description: "Technical analysis of RefleXion's biology-guided radiotherapy.", platform: "MEDIUM", link: "https://medium.com/@joel.amaldas/scintix-how-ai-driven-radiotherapy-from-reflexion-is-revolutionizing-cancer-treatment-at-stanford-2575b5e43755" }
-                                    ]).map(pub => (
-                                        <a key={pub.id} href={pub.link} target="_blank" rel="noopener noreferrer" className={`relative block p-6 rounded-xl bg-white shadow-lg border border-cyan-100 hover:shadow-xl hover:-translate-y-1 hover:border-cyan-400 transition-all duration-300 group overflow-hidden ${isHorizontal ? 'flex items-center gap-4' : ''}`}>
+                                    {(() => {
+                                        const cardStyles = getSectionCardStyles('publications');
+                                        return (portfolioData.publications.length > 0 ? portfolioData.publications : [
+                                            { id: 1, title: "Scintix: AI-Driven Radiotherapy at Stanford", description: "Technical analysis of RefleXion's biology-guided radiotherapy.", platform: "MEDIUM", link: "https://medium.com/@joel.amaldas/scintix-how-ai-driven-radiotherapy-from-reflexion-is-revolutionizing-cancer-treatment-at-stanford-2575b5e43755" }
+                                        ]).map(pub => (
+                                            <a 
+                                                key={pub.id} 
+                                                href={pub.link} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className={`relative block p-6 rounded-xl shadow-lg border border-cyan-100 hover:shadow-xl hover:-translate-y-1 hover:border-cyan-400 transition-all duration-300 group overflow-hidden ${isHorizontal ? 'flex items-center gap-4' : ''}`}
+                                                style={{ backgroundColor: cardStyles.cardColor }}
+                                                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                                }}
+                                                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                    e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                                }}
+                                            >
                                 <ColoredBlob color="cyan" />
                                             <div className={`relative z-10 ${isHorizontal ? 'flex-1' : ''}`}>
                                                 <div className="text-cyan-600 text-xs font-bold mb-1 uppercase tracking-wide">{pub.platform}</div>
@@ -1360,14 +1526,15 @@ const App = () => {
                                                 <p className="text-sm text-slate-600">{pub.description}</p>
                                             </div>
                                         </a>
-                                    ))}
+                                    ));
+                                    })()}
                                 </div>
                             );
                         })()}
                     </Section>
 
                     {/* ENDORSEMENTS SECTION */}
-                    <Section id="endorsements" title="Endorsements" chapter="Chapter 08" color="pink" borderColor="border-pink-500">
+                    <Section id="endorsements" title="Endorsements" chapter="Chapter 08" color="pink" borderColor="border-pink-500" sectionName="endorsements">
                         {(() => {
                             const layout = portfolioData.sectionLayouts['endorsements'];
                             const isHorizontal = layout?.card_direction === 'horizontal';
@@ -1379,8 +1546,20 @@ const App = () => {
                                     ]).map((item) => {
                                         const CardWrapper = item.link ? 'a' : 'div';
                                         const cardProps = item.link ? { href: item.link, target: '_blank', rel: 'noopener noreferrer' } : {};
+                                        const cardStyles = getSectionCardStyles('endorsements');
                                         return (
-                                        <CardWrapper key={item.id} {...cardProps} className={`relative bg-white shadow-lg p-8 rounded-2xl border border-pink-100 hover:shadow-xl hover:-translate-y-1 hover:border-pink-300 transition-all duration-300 group overflow-hidden ${isHorizontal ? 'flex items-start gap-4' : ''} ${item.link ? 'cursor-pointer' : ''}`}>
+                                        <CardWrapper 
+                                            key={item.id} 
+                                            {...cardProps} 
+                                            className={`relative shadow-lg p-8 rounded-2xl border border-pink-100 hover:shadow-xl hover:-translate-y-1 hover:border-pink-300 transition-all duration-300 group overflow-hidden ${isHorizontal ? 'flex items-start gap-4' : ''} ${item.link ? 'cursor-pointer' : ''}`}
+                                            style={{ backgroundColor: cardStyles.cardColor }}
+                                            onMouseEnter={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardHoverColor;
+                                            }}
+                                            onMouseLeave={(e: React.MouseEvent<HTMLElement>) => {
+                                                e.currentTarget.style.backgroundColor = cardStyles.cardColor;
+                                            }}
+                                        >
                                             <ColoredBlob color={item.color} />
                                             <Quote className={`text-pink-200 w-8 h-8 group-hover:text-pink-300 transition-colors duration-300 flex-shrink-0 ${isHorizontal ? '' : 'absolute top-8 right-8'}`} />
                                             <div className="flex-1 relative z-10">
@@ -1402,7 +1581,7 @@ const App = () => {
                     </Section>
 
                     {/* NEWSLETTER SECTION */}
-                    <Section id="newsletter" title="Newsletter" chapter="Chapter 09" color="indigo" borderColor="border-indigo-500">
+                    <Section id="newsletter" title="Newsletter" chapter="Chapter 09" color="indigo" borderColor="border-indigo-500" sectionName="newsletter">
                         <NewsletterForm portfolioData={portfolioData} />
                     </Section>
 
@@ -1411,20 +1590,20 @@ const App = () => {
           </div>
 
           {/* FOOTER SECTION - Full Width Below Sidebar */}
-          <footer className="w-full border-t border-slate-200 mt-12 bg-white text-slate-900">
-            <div className="max-w-7xl mx-auto px-4 py-6">
+          <footer className="w-full border-t border-slate-200 mt-12 bg-white text-slate-900" style={getSectionFontStyles('footer')}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
               {portfolioData.footer ? (
                 <div>
-                  <div className="grid md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                             {/* Left Side - Social Media Links */}
-                            <div className="space-y-4">
-                              <h3 className="text-xl font-bold uppercase tracking-wider mb-4">Connect</h3>
-                              <div className="flex gap-6">
+                            <div className="space-y-4 text-center sm:text-left">
+                              <h3 className="text-lg sm:text-xl font-bold uppercase tracking-wider mb-4">Connect</h3>
+                              <div className="flex gap-4 sm:gap-6 justify-center sm:justify-start">
                                 <a 
                                   href={portfolioData.footer.linkedin_url || '#'} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
+                                  className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
                                   aria-label="LinkedIn"
                                 >
                                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1435,7 +1614,7 @@ const App = () => {
                                   href={portfolioData.footer.github_url || '#'} 
                                   target="_blank" 
                                   rel="noopener noreferrer"
-                                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
+                                  className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
                                   aria-label="GitHub"
                                 >
                                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1444,7 +1623,7 @@ const App = () => {
                                 </a>
                                 <a 
                                   href={`mailto:${portfolioData.footer.contact_email || portfolioData.footer.email_url}`} 
-                                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
+                                  className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
                                   aria-label="Email"
                                 >
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1455,10 +1634,10 @@ const App = () => {
                             </div>
 
                             {/* Right Side - Content */}
-                            <div className="grid md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
                               {/* Name & Roles */}
                               <div>
-                                <h4 className="text-lg font-bold uppercase mb-3">{portfolioData.footer.name}</h4>
+                                <h4 className="text-base sm:text-lg font-bold uppercase mb-3">{portfolioData.footer.name}</h4>
                                 <ul className="space-y-1 text-slate-600 text-sm">
                                   {portfolioData.footer.roles.map((role, idx) => (
                                     <li key={idx}>{role}</li>
@@ -1469,7 +1648,7 @@ const App = () => {
 
                               {/* Education */}
                               <div>
-                                <h4 className="text-lg font-bold uppercase mb-3">{portfolioData.footer.education_title}</h4>
+                                <h4 className="text-base sm:text-lg font-bold uppercase mb-3">{portfolioData.footer.education_title}</h4>
                                 <ul className="space-y-1 text-slate-600 text-sm">
                                   {portfolioData.footer.education_items.map((item, idx) => (
                                     <li key={idx}>{item}</li>
@@ -1479,14 +1658,14 @@ const App = () => {
 
                               {/* Status */}
                               <div>
-                                <h4 className="text-lg font-bold uppercase mb-3">Status</h4>
+                                <h4 className="text-base sm:text-lg font-bold uppercase mb-3">Status</h4>
                                 <div className="space-y-1 text-slate-600 text-sm">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 justify-center sm:justify-start">
                                     <span className={`w-2 h-2 rounded-full ${portfolioData.footer.status_available ? 'bg-green-500' : 'bg-red-500'}`}></span>
                                     <span>{portfolioData.footer.status_text}</span>
                                   </div>
                                   <div>
-                                    <a href={`mailto:${portfolioData.footer.contact_email}`} className="hover:text-slate-900 transition-colors">
+                                    <a href={`mailto:${portfolioData.footer.contact_email}`} className="hover:text-slate-900 transition-colors break-all">
                                       {portfolioData.footer.contact_email}
                                     </a>
                                   </div>
@@ -1507,6 +1686,9 @@ const App = () => {
           </footer>
         </div>
       </main>
+      
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   );
 };

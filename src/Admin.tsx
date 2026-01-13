@@ -4,7 +4,7 @@ import {
   LogOut, Save, Plus, Trash2, ChevronDown, ChevronRight, 
   Upload, X, GripVertical, Home, User, Briefcase, FolderOpen,
   Award, Users, Newspaper, BookOpen, Quote, Mail, Settings,
-  Eye, EyeOff, Maximize2, AlignLeft, AlignCenter, AlignRight, Heart, Trophy
+  Eye, EyeOff, Maximize2, AlignLeft, AlignCenter, AlignRight, Heart, Trophy, Type, Palette
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
@@ -26,6 +26,11 @@ interface LayoutSettings {
   showImage: boolean;
   imagePosition: 'top' | 'left' | 'right' | 'background';
   imageSize: 'sm' | 'md' | 'lg' | 'full';
+  fontFamily?: string;
+  fontSize?: string;
+  fontColor?: string;
+  cardColor?: string;
+  cardHoverColor?: string;
 }
 
 const defaultCardStyle: CardStyle = {
@@ -43,7 +48,10 @@ const defaultLayoutSettings: LayoutSettings = {
   gap: '6',
   showImage: true,
   imagePosition: 'top',
-  imageSize: 'md'
+  imageSize: 'md',
+  fontFamily: 'Inter, system-ui, sans-serif',
+  fontSize: '16px',
+  fontColor: '#1e293b'
 };
 
 // Layout Editor Component
@@ -61,8 +69,8 @@ const LayoutEditor = ({
   sectionName?: string;
 }) => {
   return (
-    <div className="space-y-4 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
-      <div className="flex items-center justify-between mb-2">
+    <div className="space-y-4 p-3 sm:p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
           <Maximize2 className="w-4 h-4 text-indigo-600" />
           <h4 className="font-bold text-slate-800 text-sm">Layout Settings</h4>
@@ -70,7 +78,7 @@ const LayoutEditor = ({
         {onSave && (
           <button
             onClick={onSave}
-            className="px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1"
+            className="px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1 w-full sm:w-auto justify-center"
           >
             <Save className="w-3 h-3" />
             Save Layout
@@ -78,7 +86,7 @@ const LayoutEditor = ({
         )}
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
         {/* Grid Layout */}
         <div>
           <label className="text-xs text-slate-600 mb-1 block">Grid Layout</label>
@@ -201,6 +209,78 @@ const LayoutEditor = ({
             )}
           </>
         )}
+      </div>
+
+      {/* Font Settings */}
+      <div className="mt-4 pt-4 border-t border-indigo-200">
+        <div className="flex items-center gap-2 mb-3">
+          <Type className="w-4 h-4 text-indigo-600" />
+          <h5 className="font-bold text-slate-800 text-xs">Font Settings</h5>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {/* Font Family */}
+          <div>
+            <label className="text-xs text-slate-600 mb-1 block">Font Family</label>
+            <select
+              value={settings.fontFamily || 'Inter, system-ui, sans-serif'}
+              onChange={(e) => onChange({ ...settings, fontFamily: e.target.value })}
+              className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
+            >
+              <option value="Inter, system-ui, sans-serif">Inter (Default)</option>
+              <option value="'Roboto', sans-serif">Roboto</option>
+              <option value="'Open Sans', sans-serif">Open Sans</option>
+              <option value="'Lato', sans-serif">Lato</option>
+              <option value="'Montserrat', sans-serif">Montserrat</option>
+              <option value="'Poppins', sans-serif">Poppins</option>
+              <option value="'Raleway', sans-serif">Raleway</option>
+              <option value="'Playfair Display', serif">Playfair Display (Serif)</option>
+              <option value="'Merriweather', serif">Merriweather (Serif)</option>
+              <option value="'Courier New', monospace">Courier New (Monospace)</option>
+              <option value="system-ui, -apple-system, sans-serif">System Font</option>
+            </select>
+          </div>
+
+          {/* Font Size */}
+          <div>
+            <label className="text-xs text-slate-600 mb-1 block">Font Size</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min="12"
+                max="24"
+                value={parseInt(settings.fontSize || '16')}
+                onChange={(e) => onChange({ ...settings, fontSize: `${e.target.value}px` })}
+                className="flex-1"
+              />
+              <input
+                type="text"
+                value={settings.fontSize || '16px'}
+                onChange={(e) => onChange({ ...settings, fontSize: e.target.value })}
+                className="w-16 px-2 py-1.5 text-xs border border-slate-300 rounded-lg text-center font-mono"
+              />
+            </div>
+          </div>
+
+          {/* Font Color */}
+          <div>
+            <label className="text-xs text-slate-600 mb-1 block">Font Color</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={settings.fontColor || '#1e293b'}
+                onChange={(e) => onChange({ ...settings, fontColor: e.target.value })}
+                className="w-10 h-8 border border-slate-300 rounded-lg cursor-pointer"
+              />
+              <input
+                type="text"
+                value={settings.fontColor || '#1e293b'}
+                onChange={(e) => onChange({ ...settings, fontColor: e.target.value })}
+                className="flex-1 px-2 py-1.5 text-xs border border-slate-300 rounded-lg font-mono"
+                placeholder="#1e293b"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Visual Preview */}
@@ -793,19 +873,302 @@ const IconSelect = ({ value, onChange, label }: { value: string; onChange: (v: s
   );
 };
 
+// Font Settings Component (standalone for sections without LayoutEditor)
+const FontSettings = ({ 
+  section, 
+  settings, 
+  onSave 
+}: { 
+  section: string;
+  settings: { fontFamily?: string; fontSize?: string; fontColor?: string };
+  onSave: (settings: { fontFamily: string; fontSize: string; fontColor: string }) => Promise<void>;
+}) => {
+  const [fontSettings, setFontSettings] = useState({
+    fontFamily: settings.fontFamily || 'Inter, system-ui, sans-serif',
+    fontSize: settings.fontSize || '16px',
+    fontColor: settings.fontColor || '#1e293b'
+  });
+
+  useEffect(() => {
+    setFontSettings({
+      fontFamily: settings.fontFamily || 'Inter, system-ui, sans-serif',
+      fontSize: settings.fontSize || '16px',
+      fontColor: settings.fontColor || '#1e293b'
+    });
+  }, [settings.fontFamily, settings.fontSize, settings.fontColor]);
+
+  const handleSave = async () => {
+    await onSave(fontSettings);
+  };
+
+  return (
+    <div className="mb-6 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Type className="w-4 h-4 text-indigo-600" />
+          <h5 className="font-bold text-slate-800 text-sm">Font Settings</h5>
+        </div>
+        <button
+          onClick={handleSave}
+          className="px-4 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-1"
+        >
+          <Save className="w-3 h-3" />
+          Save Font
+        </button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Font Family */}
+        <div>
+          <label className="text-xs text-slate-600 mb-1 block">Font Family</label>
+          <select
+            value={fontSettings.fontFamily}
+            onChange={(e) => setFontSettings({ ...fontSettings, fontFamily: e.target.value })}
+            className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
+          >
+            <option value="Inter, system-ui, sans-serif">Inter (Default)</option>
+            <option value="'Roboto', sans-serif">Roboto</option>
+            <option value="'Open Sans', sans-serif">Open Sans</option>
+            <option value="'Lato', sans-serif">Lato</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Poppins', sans-serif">Poppins</option>
+            <option value="'Raleway', sans-serif">Raleway</option>
+            <option value="'Playfair Display', serif">Playfair Display (Serif)</option>
+            <option value="'Merriweather', serif">Merriweather (Serif)</option>
+            <option value="'Courier New', monospace">Courier New (Monospace)</option>
+            <option value="system-ui, -apple-system, sans-serif">System Font</option>
+          </select>
+        </div>
+
+        {/* Font Size */}
+        <div>
+          <label className="text-xs text-slate-600 mb-1 block">Font Size</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min="12"
+              max="24"
+              value={parseInt(fontSettings.fontSize || '16')}
+              onChange={(e) => setFontSettings({ ...fontSettings, fontSize: `${e.target.value}px` })}
+              className="flex-1"
+            />
+            <input
+              type="text"
+              value={fontSettings.fontSize}
+              onChange={(e) => setFontSettings({ ...fontSettings, fontSize: e.target.value })}
+              className="w-16 px-2 py-1.5 text-xs border border-slate-300 rounded-lg text-center font-mono"
+            />
+          </div>
+        </div>
+
+        {/* Font Color */}
+        <div>
+          <label className="text-xs text-slate-600 mb-1 block">Font Color</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={fontSettings.fontColor}
+              onChange={(e) => setFontSettings({ ...fontSettings, fontColor: e.target.value })}
+              className="w-10 h-8 border border-slate-300 rounded-lg cursor-pointer"
+            />
+            <input
+              type="text"
+              value={fontSettings.fontColor}
+              onChange={(e) => setFontSettings({ ...fontSettings, fontColor: e.target.value })}
+              className="flex-1 px-2 py-1.5 text-xs border border-slate-300 rounded-lg font-mono"
+              placeholder="#1e293b"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Card Style Settings Component
+const CardStyleSettings = ({ 
+  section, 
+  settings, 
+  onSave 
+}: { 
+  section: string;
+  settings: { cardColor?: string; cardHoverColor?: string };
+  onSave: (settings: { cardColor: string; cardHoverColor: string }) => Promise<void>;
+}) => {
+  const [cardSettings, setCardSettings] = useState({
+    cardColor: settings.cardColor || '#ffffff',
+    cardHoverColor: settings.cardHoverColor || '#f8fafc'
+  });
+
+  useEffect(() => {
+    setCardSettings({
+      cardColor: settings.cardColor || '#ffffff',
+      cardHoverColor: settings.cardHoverColor || '#f8fafc'
+    });
+  }, [settings.cardColor, settings.cardHoverColor]);
+
+  const handleSave = async () => {
+    await onSave(cardSettings);
+  };
+
+  // Preset color options
+  const presetColors = [
+    { name: 'White', color: '#ffffff' },
+    { name: 'Light Gray', color: '#f8fafc' },
+    { name: 'Warm Gray', color: '#f5f5f4' },
+    { name: 'Cool Gray', color: '#f1f5f9' },
+    { name: 'Light Blue', color: '#eff6ff' },
+    { name: 'Light Purple', color: '#faf5ff' },
+    { name: 'Light Pink', color: '#fdf2f8' },
+    { name: 'Light Yellow', color: '#fefce8' },
+    { name: 'Light Green', color: '#f0fdf4' },
+    { name: 'Dark Slate', color: '#1e293b' },
+    { name: 'Dark Gray', color: '#374151' },
+    { name: 'Black', color: '#000000' },
+  ];
+
+  const hoverPresetColors = [
+    { name: 'Subtle Gray', color: '#f8fafc' },
+    { name: 'Light Slate', color: '#f1f5f9' },
+    { name: 'Warm Hover', color: '#fef3c7' },
+    { name: 'Blue Hover', color: '#dbeafe' },
+    { name: 'Purple Hover', color: '#ede9fe' },
+    { name: 'Pink Hover', color: '#fce7f3' },
+    { name: 'Green Hover', color: '#dcfce7' },
+    { name: 'Dark Hover', color: '#334155' },
+    { name: 'Darker', color: '#1a1a2e' },
+    { name: 'Black Hover', color: '#111111' },
+  ];
+
+  return (
+    <div className="mb-6 p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Palette className="w-4 h-4 text-emerald-600" />
+          <h5 className="font-bold text-slate-800 text-sm">Card Style Settings</h5>
+        </div>
+        <button
+          onClick={handleSave}
+          className="px-4 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-1"
+        >
+          <Save className="w-3 h-3" />
+          Save Card Style
+        </button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card Background Color */}
+        <div>
+          <label className="text-xs text-slate-600 mb-2 block font-medium">Card Background Color</label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {presetColors.map((preset) => (
+              <button
+                key={preset.color}
+                onClick={() => setCardSettings({ ...cardSettings, cardColor: preset.color })}
+                className={`w-8 h-8 rounded-lg border-2 transition-all ${
+                  cardSettings.cardColor === preset.color 
+                    ? 'border-emerald-500 scale-110 shadow-md' 
+                    : 'border-slate-200 hover:border-slate-400'
+                }`}
+                style={{ backgroundColor: preset.color }}
+                title={preset.name}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={cardSettings.cardColor}
+              onChange={(e) => setCardSettings({ ...cardSettings, cardColor: e.target.value })}
+              className="w-10 h-8 border border-slate-300 rounded-lg cursor-pointer"
+            />
+            <input
+              type="text"
+              value={cardSettings.cardColor}
+              onChange={(e) => setCardSettings({ ...cardSettings, cardColor: e.target.value })}
+              className="flex-1 px-2 py-1.5 text-xs border border-slate-300 rounded-lg font-mono"
+              placeholder="#ffffff"
+            />
+          </div>
+        </div>
+
+        {/* Card Hover Color */}
+        <div>
+          <label className="text-xs text-slate-600 mb-2 block font-medium">Card Hover Color</label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {hoverPresetColors.map((preset) => (
+              <button
+                key={preset.color}
+                onClick={() => setCardSettings({ ...cardSettings, cardHoverColor: preset.color })}
+                className={`w-8 h-8 rounded-lg border-2 transition-all ${
+                  cardSettings.cardHoverColor === preset.color 
+                    ? 'border-emerald-500 scale-110 shadow-md' 
+                    : 'border-slate-200 hover:border-slate-400'
+                }`}
+                style={{ backgroundColor: preset.color }}
+                title={preset.name}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={cardSettings.cardHoverColor}
+              onChange={(e) => setCardSettings({ ...cardSettings, cardHoverColor: e.target.value })}
+              className="w-10 h-8 border border-slate-300 rounded-lg cursor-pointer"
+            />
+            <input
+              type="text"
+              value={cardSettings.cardHoverColor}
+              onChange={(e) => setCardSettings({ ...cardSettings, cardHoverColor: e.target.value })}
+              className="flex-1 px-2 py-1.5 text-xs border border-slate-300 rounded-lg font-mono"
+              placeholder="#f8fafc"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Preview */}
+      <div className="mt-4 p-4 rounded-lg border border-slate-200" style={{ backgroundColor: cardSettings.cardColor }}>
+        <p className="text-xs text-slate-500 mb-2">Card Preview (hover to see hover color):</p>
+        <div 
+          className="p-4 rounded-lg transition-all duration-300 cursor-pointer"
+          style={{ backgroundColor: cardSettings.cardColor }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = cardSettings.cardHoverColor}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = cardSettings.cardColor}
+        >
+          <div className="font-medium" style={{ color: cardSettings.cardColor === '#000000' || cardSettings.cardColor === '#1e293b' || cardSettings.cardColor === '#374151' ? '#ffffff' : '#1e293b' }}>
+            Sample Card Title
+          </div>
+          <div className="text-sm mt-1" style={{ color: cardSettings.cardColor === '#000000' || cardSettings.cardColor === '#1e293b' || cardSettings.cardColor === '#374151' ? '#94a3b8' : '#64748b' }}>
+            This is how your card will look with the selected colors.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Section Preview Modal
 const SectionPreviewModal = ({ 
   isOpen, 
   onClose, 
   title, 
-  children 
+  children,
+  fontSettings
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
   title: string; 
   children: React.ReactNode;
+  fontSettings?: { fontFamily?: string; fontSize?: string; fontColor?: string };
 }) => {
   if (!isOpen) return null;
+  
+  const previewStyle = fontSettings ? {
+    fontFamily: fontSettings.fontFamily || 'Inter, system-ui, sans-serif',
+    fontSize: fontSettings.fontSize || '16px',
+    color: fontSettings.fontColor || '#1e293b'
+  } : {};
   
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -816,6 +1179,16 @@ const SectionPreviewModal = ({
             <Eye className="w-5 h-5 text-indigo-600" />
             <h3 className="font-bold text-slate-900">Preview: {title}</h3>
           </div>
+          {fontSettings && (
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Type className="w-3 h-3" />
+              <span>{fontSettings.fontFamily?.split(',')[0] || 'Inter'}</span>
+              <span>•</span>
+              <span>{fontSettings.fontSize || '16px'}</span>
+              <span>•</span>
+              <span className="w-3 h-3 rounded-full border border-slate-300" style={{ backgroundColor: fontSettings.fontColor || '#1e293b' }}></span>
+            </div>
+          )}
           <button 
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-slate-200 transition-colors"
@@ -826,7 +1199,7 @@ const SectionPreviewModal = ({
         
         {/* Preview Content */}
         <div className="flex-1 overflow-auto p-6 bg-slate-100">
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6" style={previewStyle}>
             {children}
           </div>
         </div>
@@ -860,7 +1233,8 @@ const SectionWrapper = ({
   isOpen, 
   onToggle,
   onPreview,
-  previewContent
+  previewContent,
+  fontSettings
 }: { 
   title: string; 
   icon: React.ElementType; 
@@ -869,33 +1243,35 @@ const SectionWrapper = ({
   onToggle: () => void;
   onPreview?: () => void;
   previewContent?: React.ReactNode;
+  fontSettings?: { fontFamily?: string; fontSize?: string; fontColor?: string };
 }) => {
   const [showPreview, setShowPreview] = useState(false);
   
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-          <button onClick={onToggle} className="flex items-center gap-3 flex-1 text-left">
-            <Icon className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="w-full px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+          <button onClick={onToggle} className="flex items-center gap-2 sm:gap-3 flex-1 text-left min-w-0">
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 flex-shrink-0" />
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 truncate">{title}</h2>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {previewContent && (
               <button 
                 onClick={() => setShowPreview(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
               >
-                <Eye className="w-4 h-4" />
-                Preview Section
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Preview Section</span>
+                <span className="sm:hidden">Preview</span>
               </button>
             )}
-            <button onClick={onToggle}>
-              {isOpen ? <ChevronDown className="w-5 h-5 text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
+            <button onClick={onToggle} className="p-1">
+              {isOpen ? <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" /> : <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />}
             </button>
           </div>
         </div>
-        {isOpen && <div className="px-6 pb-6 border-t border-slate-100 pt-4">{children}</div>}
+        {isOpen && <div className="px-3 sm:px-6 pb-4 sm:pb-6 border-t border-slate-100 pt-3 sm:pt-4">{children}</div>}
       </div>
       
       {previewContent && (
@@ -903,6 +1279,7 @@ const SectionWrapper = ({
           isOpen={showPreview} 
           onClose={() => setShowPreview(false)} 
           title={title}
+          fontSettings={fontSettings}
         >
           {previewContent}
         </SectionPreviewModal>
@@ -972,14 +1349,93 @@ export default function Admin() {
           gap: settings.gap,
           show_image: settings.showImage,
           image_position: settings.imagePosition,
-          image_size: settings.imageSize
+          image_size: settings.imageSize,
+          font_family: settings.fontFamily || 'Inter, system-ui, sans-serif',
+          font_size: settings.fontSize || '16px',
+          font_color: settings.fontColor || '#1e293b',
+          card_color: settings.cardColor || '#ffffff',
+          card_hover_color: settings.cardHoverColor || '#f8fafc'
         }, { onConflict: 'section_name' });
       
       if (error) throw error;
-      showNotification('success', `Layout saved for ${section}`);
+      showNotification('success', `Layout and style settings saved for ${section}`);
     } catch (error) {
       console.error('Error saving layout:', error);
       showNotification('error', 'Failed to save layout');
+    }
+  };
+
+  // Save card style settings
+  const saveCardSettings = async (section: string, cardSettings: { cardColor: string; cardHoverColor: string }) => {
+    try {
+      const existingSettings = sectionLayouts[section] || {};
+      const { error } = await supabase
+        .from('section_layouts')
+        .upsert({
+          section_name: section,
+          layout: existingSettings.layout || 'grid-2',
+          card_direction: existingSettings.cardDirection || 'vertical',
+          gap: existingSettings.gap || '4',
+          show_image: existingSettings.showImage ?? false,
+          image_position: existingSettings.imagePosition || 'top',
+          image_size: existingSettings.imageSize || 'md',
+          font_family: existingSettings.fontFamily || 'Inter, system-ui, sans-serif',
+          font_size: existingSettings.fontSize || '16px',
+          font_color: existingSettings.fontColor || '#1e293b',
+          card_color: cardSettings.cardColor,
+          card_hover_color: cardSettings.cardHoverColor
+        }, { onConflict: 'section_name' });
+      
+      if (error) throw error;
+      showNotification('success', `Card style saved for ${section}`);
+      // Update local state
+      setSectionLayouts(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          cardColor: cardSettings.cardColor,
+          cardHoverColor: cardSettings.cardHoverColor
+        } as LayoutSettings
+      }));
+    } catch (error) {
+      console.error('Error saving card settings:', error);
+      showNotification('error', 'Failed to save card settings');
+    }
+  };
+
+  // Save font settings (for sections without layout)
+  const saveFontSettings = async (section: string, fontSettings: { fontFamily: string; fontSize: string; fontColor: string }) => {
+    try {
+      const { error } = await supabase
+        .from('section_layouts')
+        .upsert({
+          section_name: section,
+          layout: 'grid-2',
+          card_direction: 'vertical',
+          gap: '4',
+          show_image: false,
+          image_position: 'top',
+          image_size: 'md',
+          font_family: fontSettings.fontFamily,
+          font_size: fontSettings.fontSize,
+          font_color: fontSettings.fontColor
+        }, { onConflict: 'section_name' });
+      
+      if (error) throw error;
+      showNotification('success', `Font settings saved for ${section}`);
+      // Update local state
+      setSectionLayouts(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          fontFamily: fontSettings.fontFamily,
+          fontSize: fontSettings.fontSize,
+          fontColor: fontSettings.fontColor
+        } as LayoutSettings
+      }));
+    } catch (error) {
+      console.error('Error saving font settings:', error);
+      showNotification('error', 'Failed to save font settings');
     }
   };
 
@@ -996,7 +1452,12 @@ export default function Admin() {
             gap: row.gap as LayoutSettings['gap'],
             showImage: row.show_image,
             imagePosition: row.image_position as LayoutSettings['imagePosition'],
-            imageSize: row.image_size as LayoutSettings['imageSize']
+            imageSize: row.image_size as LayoutSettings['imageSize'],
+            fontFamily: row.font_family || 'Inter, system-ui, sans-serif',
+            fontSize: row.font_size || '16px',
+            fontColor: row.font_color || '#1e293b',
+            cardColor: row.card_color || '#ffffff',
+            cardHoverColor: row.card_hover_color || '#f8fafc'
           };
         });
         setSectionLayouts(prev => ({ ...prev, ...layouts }));
@@ -1656,32 +2117,35 @@ export default function Admin() {
 
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-              <Settings className="w-5 h-5 text-white" />
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center">
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-slate-900">Portfolio Admin</h1>
-              <p className="text-xs text-slate-500">{user.email}</p>
+              <h1 className="font-bold text-slate-900 text-sm sm:text-base">Portfolio Admin</h1>
+              <p className="text-xs text-slate-500 hidden sm:block">{user.email}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="/" target="_blank" className="px-4 py-2 text-slate-600 hover:text-slate-900 text-sm font-medium">
+          <div className="flex items-center gap-1 sm:gap-3">
+            <a href="/" target="_blank" className="px-2 sm:px-4 py-2 text-slate-600 hover:text-slate-900 text-xs sm:text-sm font-medium hidden sm:block">
               View Site →
+            </a>
+            <a href="/" target="_blank" className="sm:hidden w-8 h-8 flex items-center justify-center text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100">
+              <Eye className="w-4 h-4" />
             </a>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
             >
-              <LogOut className="w-4 h-4" /> Logout
+              <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-4">
+      <main className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-3 sm:space-y-4">
         
         {/* Hero Section */}
         <SectionWrapper 
@@ -1689,6 +2153,11 @@ export default function Admin() {
           icon={Home} 
           isOpen={openSections.hero} 
           onToggle={() => toggleSection('hero')}
+          fontSettings={{
+            fontFamily: sectionLayouts['hero']?.font_family || 'Inter, system-ui, sans-serif',
+            fontSize: sectionLayouts['hero']?.font_size || '16px',
+            fontColor: sectionLayouts['hero']?.font_color || '#1e293b'
+          }}
           previewContent={heroContent && (
             <div className="bg-[#000205] text-white p-8 rounded-xl relative overflow-hidden min-h-[600px]">
               {/* Simplified particle background */}
@@ -1929,6 +2398,11 @@ export default function Admin() {
           icon={User} 
           isOpen={openSections.about} 
           onToggle={() => toggleSection('about')}
+          fontSettings={{
+            fontFamily: sectionLayouts['about']?.font_family || 'Inter, system-ui, sans-serif',
+            fontSize: sectionLayouts['about']?.font_size || '16px',
+            fontColor: sectionLayouts['about']?.font_color || '#1e293b'
+          }}
           previewContent={aboutContent && (
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-slate-400 pl-4">
@@ -1954,6 +2428,25 @@ export default function Admin() {
         >
           {aboutContent && (
             <div className="space-y-4">
+              {/* Font Settings */}
+              <FontSettings
+                section="about"
+                settings={{
+                  fontFamily: sectionLayouts.about?.fontFamily,
+                  fontSize: sectionLayouts.about?.fontSize,
+                  fontColor: sectionLayouts.about?.fontColor
+                }}
+                onSave={(s) => saveFontSettings('about', s)}
+              />
+              {/* Card Style Settings */}
+              <CardStyleSettings
+                section="about"
+                settings={{
+                  cardColor: sectionLayouts.about?.cardColor,
+                  cardHoverColor: sectionLayouts.about?.cardHoverColor
+                }}
+                onSave={(s) => saveCardSettings('about', s)}
+              />
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Paragraph 1</label>
                 <textarea
@@ -1995,6 +2488,11 @@ export default function Admin() {
           icon={Briefcase} 
           isOpen={openSections.leadership} 
           onToggle={() => toggleSection('leadership')}
+          fontSettings={{
+            fontFamily: sectionLayouts.leadership?.fontFamily,
+            fontSize: sectionLayouts.leadership?.fontSize,
+            fontColor: sectionLayouts.leadership?.fontColor
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-violet-500 pl-4">
@@ -2036,6 +2534,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-4">
+            {/* Font Settings */}
+            <FontSettings
+              section="leadership"
+              settings={{
+                fontFamily: sectionLayouts.leadership?.fontFamily,
+                fontSize: sectionLayouts.leadership?.fontSize,
+                fontColor: sectionLayouts.leadership?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('leadership', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="leadership"
+              settings={{
+                cardColor: sectionLayouts.leadership?.cardColor,
+                cardHoverColor: sectionLayouts.leadership?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('leadership', s)}
+            />
+            
             {leadership.map((item, index) => (
               <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
@@ -2130,6 +2649,11 @@ export default function Admin() {
           icon={FolderOpen} 
           isOpen={openSections.projects} 
           onToggle={() => toggleSection('projects')}
+          fontSettings={{
+            fontFamily: sectionLayouts.projects?.fontFamily,
+            fontSize: sectionLayouts.projects?.fontSize,
+            fontColor: sectionLayouts.projects?.fontColor
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-blue-500 pl-4">
@@ -2196,6 +2720,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-4">
+            {/* Font Settings */}
+            <FontSettings
+              section="projects"
+              settings={{
+                fontFamily: sectionLayouts.projects?.fontFamily,
+                fontSize: sectionLayouts.projects?.fontSize,
+                fontColor: sectionLayouts.projects?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('projects', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="projects"
+              settings={{
+                cardColor: sectionLayouts.projects?.cardColor,
+                cardHoverColor: sectionLayouts.projects?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('projects', s)}
+            />
+            
             {projects.map((project, index) => (
               <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
@@ -2288,6 +2833,11 @@ export default function Admin() {
           icon={Award} 
           isOpen={openSections.awards} 
           onToggle={() => toggleSection('awards')}
+          fontSettings={{
+            fontFamily: sectionLayouts.awards?.fontFamily,
+            fontSize: sectionLayouts.awards?.fontSize,
+            fontColor: sectionLayouts.awards?.fontColor
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-yellow-500 pl-4">
@@ -2347,6 +2897,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-6">
+            {/* Font Settings */}
+            <FontSettings
+              section="awards"
+              settings={{
+                fontFamily: sectionLayouts.awards?.fontFamily,
+                fontSize: sectionLayouts.awards?.fontSize,
+                fontColor: sectionLayouts.awards?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('awards', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="awards"
+              settings={{
+                cardColor: sectionLayouts.awards?.cardColor,
+                cardHoverColor: sectionLayouts.awards?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('awards', s)}
+            />
+            
             <div className="space-y-3">
               <h3 className="font-bold text-slate-700">Main Awards</h3>
               {awards.map((award, index) => (
@@ -2458,6 +3029,11 @@ export default function Admin() {
           icon={Users} 
           isOpen={openSections.community} 
           onToggle={() => toggleSection('community')}
+          fontSettings={{
+            fontFamily: sectionLayouts.community?.fontFamily,
+            fontSize: sectionLayouts.community?.fontSize,
+            fontColor: sectionLayouts.community?.fontColor
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-emerald-500 pl-4">
@@ -2521,6 +3097,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-6">
+            {/* Font Settings */}
+            <FontSettings
+              section="community"
+              settings={{
+                fontFamily: sectionLayouts.community?.fontFamily,
+                fontSize: sectionLayouts.community?.fontSize,
+                fontColor: sectionLayouts.community?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('community', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="community"
+              settings={{
+                cardColor: sectionLayouts.community?.cardColor,
+                cardHoverColor: sectionLayouts.community?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('community', s)}
+            />
+            
             {/* Community Content */}
             {communityContent && (
               <div className="space-y-4">
@@ -2668,6 +3265,11 @@ export default function Admin() {
           icon={Newspaper} 
           isOpen={openSections.press} 
           onToggle={() => toggleSection('press')}
+          fontSettings={{
+            fontFamily: sectionLayouts.press?.fontFamily,
+            fontSize: sectionLayouts.press?.fontSize,
+            fontColor: sectionLayouts.press?.fontColor
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-red-500 pl-4">
@@ -2717,6 +3319,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-4">
+            {/* Font Settings */}
+            <FontSettings
+              section="press"
+              settings={{
+                fontFamily: sectionLayouts.press?.fontFamily,
+                fontSize: sectionLayouts.press?.fontSize,
+                fontColor: sectionLayouts.press?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('press', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="press"
+              settings={{
+                cardColor: sectionLayouts.press?.cardColor,
+                cardHoverColor: sectionLayouts.press?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('press', s)}
+            />
+            
             {press.map((item, index) => (
               <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
@@ -2795,6 +3418,11 @@ export default function Admin() {
           icon={BookOpen} 
           isOpen={openSections.publications} 
           onToggle={() => toggleSection('publications')}
+          fontSettings={{
+            fontFamily: sectionLayouts.publications?.fontFamily,
+            fontSize: sectionLayouts.publications?.fontSize,
+            fontColor: sectionLayouts.publications?.fontColor
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-purple-500 pl-4">
@@ -2836,6 +3464,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-4">
+            {/* Font Settings */}
+            <FontSettings
+              section="publications"
+              settings={{
+                fontFamily: sectionLayouts.publications?.fontFamily,
+                fontSize: sectionLayouts.publications?.fontSize,
+                fontColor: sectionLayouts.publications?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('publications', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="publications"
+              settings={{
+                cardColor: sectionLayouts.publications?.cardColor,
+                cardHoverColor: sectionLayouts.publications?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('publications', s)}
+            />
+            
             {publications.map((item, index) => (
               <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
@@ -2893,6 +3542,11 @@ export default function Admin() {
           icon={Quote} 
           isOpen={openSections.endorsements} 
           onToggle={() => toggleSection('endorsements')}
+          fontSettings={{
+            fontFamily: sectionLayouts.endorsements?.fontFamily,
+            fontSize: sectionLayouts.endorsements?.fontSize,
+            fontColor: sectionLayouts.endorsements?.fontColor
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-pink-500 pl-4">
@@ -2934,6 +3588,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-4">
+            {/* Font Settings */}
+            <FontSettings
+              section="endorsements"
+              settings={{
+                fontFamily: sectionLayouts.endorsements?.fontFamily,
+                fontSize: sectionLayouts.endorsements?.fontSize,
+                fontColor: sectionLayouts.endorsements?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('endorsements', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="endorsements"
+              settings={{
+                cardColor: sectionLayouts.endorsements?.cardColor,
+                cardHoverColor: sectionLayouts.endorsements?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('endorsements', s)}
+            />
+            
             {endorsements.map((item, index) => (
               <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
@@ -3007,6 +3682,11 @@ export default function Admin() {
           icon={Mail} 
           isOpen={openSections.newsletter} 
           onToggle={() => toggleSection('newsletter')}
+          fontSettings={{
+            fontFamily: sectionLayouts['newsletter']?.font_family || 'Inter, system-ui, sans-serif',
+            fontSize: sectionLayouts['newsletter']?.font_size || '16px',
+            fontColor: sectionLayouts['newsletter']?.font_color || '#1e293b'
+          }}
           previewContent={
             <div className="space-y-4">
               <div className="mb-6 border-l-4 border-indigo-500 pl-4">
@@ -3040,6 +3720,27 @@ export default function Admin() {
           }
         >
           <div className="space-y-6">
+            {/* Font Settings */}
+            <FontSettings
+              section="newsletter"
+              settings={{
+                fontFamily: sectionLayouts.newsletter?.fontFamily,
+                fontSize: sectionLayouts.newsletter?.fontSize,
+                fontColor: sectionLayouts.newsletter?.fontColor
+              }}
+              onSave={(s) => saveFontSettings('newsletter', s)}
+            />
+            
+            {/* Card Style Settings */}
+            <CardStyleSettings
+              section="newsletter"
+              settings={{
+                cardColor: sectionLayouts.newsletter?.cardColor,
+                cardHoverColor: sectionLayouts.newsletter?.cardHoverColor
+              }}
+              onSave={(s) => saveCardSettings('newsletter', s)}
+            />
+            
             {/* Info Box */}
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
               <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
@@ -3215,6 +3916,11 @@ export default function Admin() {
           icon={Home} 
           isOpen={openSections.footer} 
           onToggle={() => toggleSection('footer')}
+          fontSettings={{
+            fontFamily: sectionLayouts['footer']?.font_family || 'Inter, system-ui, sans-serif',
+            fontSize: sectionLayouts['footer']?.font_size || '16px',
+            fontColor: sectionLayouts['footer']?.font_color || '#1e293b'
+          }}
           previewContent={footer && (
             <div className="space-y-4">
               <div className="bg-white border border-slate-200 text-slate-900 p-8 rounded-xl">
@@ -3263,6 +3969,16 @@ export default function Admin() {
         >
           {footer && (
             <div className="space-y-6">
+              {/* Font Settings */}
+              <FontSettings
+                section="footer"
+                settings={{
+                  fontFamily: sectionLayouts.footer?.fontFamily,
+                  fontSize: sectionLayouts.footer?.fontSize,
+                  fontColor: sectionLayouts.footer?.fontColor
+                }}
+                onSave={(s) => saveFontSettings('footer', s)}
+              />
               {/* Basic Info */}
               <div className="space-y-4">
                 <h3 className="font-bold text-slate-700">Basic Information</h3>
